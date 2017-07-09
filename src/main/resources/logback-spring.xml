@@ -31,29 +31,29 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <!--&lt;!&ndash; 开发环境 &ndash;&gt;-->
-    <!--<springProfile name="develop">-->
-        <!--<root>-->
-            <!--<level value="DEBUG"/>-->
-            <!--<appender-ref ref="STDOUT"/>-->
-        <!--</root>-->
-    <!--</springProfile>-->
+    <!-- 开发环境 -->
+    <springProfile name="develop">
+        <root>
+            <level value="DEBUG"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
 
-    <!--&lt;!&ndash; 测试环境&ndash;&gt;-->
-    <!--<springProfile name="test">-->
-        <!--<root>-->
-            <!--<level value="DEBUG"/>-->
-            <!--<appender-ref ref="FILE"/>-->
-        <!--</root>-->
-    <!--</springProfile>-->
+    <!-- 测试环境-->
+    <springProfile name="test">
+        <root>
+            <level value="DEBUG"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
 
-    <!--&lt;!&ndash; 生产环境&ndash;&gt;-->
-    <!--<springProfile name="product">-->
-        <!--<root>-->
-            <!--<level value="DEBUG"/>-->
-            <!--<appender-ref ref="FILE"/>-->
-        <!--</root>-->
-    <!--</springProfile>-->
+    <!-- 生产环境-->
+    <springProfile name="product">
+        <root>
+            <level value="DEBUG"/>
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
 
 
     <logger name="org.springframework" level="WARN"/>
