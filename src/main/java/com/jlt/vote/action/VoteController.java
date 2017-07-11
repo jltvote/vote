@@ -1,15 +1,24 @@
 package com.jlt.vote.action;
 
-import com.jlt.vote.bis.entity.Campaign;
 import com.jlt.vote.bis.service.ICampaignService;
+import com.jlt.vote.config.SysConfig;
+import com.jlt.vote.util.HTTPUtil;
+import com.jlt.vote.util.ResponseUtils;
 import com.xcrm.log.Logger;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class VoteController {
@@ -19,29 +28,107 @@ public class VoteController {
     @Autowired
     private ICampaignService campaignService;
 
+    @Autowired
+    private SysConfig sysConfig;
+
     /**
      * 首页登陆
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/vote/index",method = {RequestMethod.GET})
-    public String login(HttpServletRequest request, HttpServletResponse response){
-        logger.info("VoteController.login");
-        return "index";
+    @RequestMapping(value ="/vote/{chainId}/index",method = {RequestMethod.GET})
+    public void index(@PathVariable Long chainId,HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("VoteController.index({})",chainId);
+
+        String wxAuthUrl = sysConfig.getWxAuthUrl();
+
+        Map<String,Object> wxAuthPara = new HashMap<>();
+        wxAuthPara.put("appid",sysConfig.getWxAppId());
+        wxAuthPara.put("response_type","code");
+        wxAuthPara.put("scope","snsapi_userinfo");
+        wxAuthPara.put("redirect_uri",sysConfig.getWxCallbackUrl());
+        wxAuthPara.put("state",chainId+"#wechat_redirect");
+        wxAuthUrl = wxAuthUrl + HTTPUtil.parseUrlPara(wxAuthPara);
+        response.sendRedirect(wxAuthUrl);
     }
 
     /**
+     * 微信授权回调
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value ="/auth/callback",method = {RequestMethod.GET})
+    public void wxRedirect(String code, String state,HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("VoteController.wxRedirect({},{})",code,state);
+        if(StringUtils.isNotBlank(code) && StringUtils.isNotBlank(state)) {
+            Long chainId = Long.valueOf(state);
+
+
+
+            //通过回调获取的code,获取授权的accessToken和openId
+            Map<String,Object> outhTokenParaMap = new HashMap<>();
+            outhTokenParaMap.put("appid",sysConfig.getWxAppId());
+            outhTokenParaMap.put("code",code);
+            outhTokenParaMap.put("grant_type","authorization_code");
+            outhTokenParaMap.put("secret",sysConfig.getWxAppSecret());
+            Map<String,Object> resultMap = HTTPUtil.sendGet(sysConfig.getWxAuthTokenUrl(),outhTokenParaMap);
+
+            if(MapUtils.isNotEmpty(resultMap)){
+                if(StringUtils.isNotEmpty(MapUtils.getString(resultMap,"errmsg"))){
+                    String errmsg = MapUtils.getString(resultMap,"errmsg","获取用户信息失败");
+                    logger.error("VoteController.wxRedirect get token error :" + errmsg);
+                    ResponseUtils.createBadResponse(response,errmsg);
+                }else{
+                    String accessToken = MapUtils.getString(resultMap,"access_token");
+                    String openId = MapUtils.getString(resultMap,"openid");
+                    String unionid = MapUtils.getString(resultMap,"unionid");
+
+                    //获取用户信息
+                    Map<String,Object> userInfoParaMap = new HashMap<>();
+                    userInfoParaMap.put("access_token",accessToken);
+                    userInfoParaMap.put("openid",openId);
+                    userInfoParaMap.put("lang","zh_CN");
+                    Map<String, Object> wxUserMap = HTTPUtil.sendGet(sysConfig.getWxUserInfoUrl(),userInfoParaMap);
+
+                    if(MapUtils.isNotEmpty(wxUserMap)){
+                        if(wxUserMap.containsKey("errmsg")){
+                            String errmsg = MapUtils.getString(wxUserMap,"errmsg","获取用户信息失败");
+                            logger.error("WxAuthController.queryWxUser occurs error.chainId:{},openId:{},userInfoParaMap:{},errmsg:{}",
+                                    chainId,openId,userInfoParaMap,errmsg);
+                            ResponseUtils.createBadResponse(response,errmsg);
+                        }
+
+                        logger.info("WxAuthController.queryWxUser user:" + resultMap);
+
+                        //保存用户信息到db
+                        String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), chainId);
+                        logger.info("WxAuthController reirect url:" + redirectHomeUrl);
+                        response.sendRedirect(response.encodeRedirectURL(redirectHomeUrl));
+
+                    }else{
+                        logger.error("WxAuthController.queryWxUser occurs error.chainId:{},openId:{},userInfoParaMap:{}",
+                                chainId,openId,userInfoParaMap);
+                        ResponseUtils.createBadResponse(response,"获取用户信息失败");
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    /**
      * 首页登陆
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/vote/home",method = {RequestMethod.GET})
-    public String v_home(Long chainId, HttpServletRequest request, HttpServletResponse response){
+    @RequestMapping(value ="/vote/{chainId}/home",method = {RequestMethod.GET})
+    public String v_home(@PathVariable Long chainId, HttpServletRequest request, HttpServletResponse response){
         logger.info("VoteController.v_home,chainId:{}",chainId);
-        //通过chainId 查询 发起人信息
-        Campaign campaign = campaignService.queryCampaignInfo(chainId);
+//        //通过chainId 查询 发起人信息
+//        Campaign campaign = campaignService.queryCampaignInfo(chainId);
 
-        return "home";
+        return "index";
     }
 
 }
