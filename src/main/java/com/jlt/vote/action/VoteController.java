@@ -120,10 +120,6 @@ public class VoteController {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(MessageFormat.format("https://wx.jilunxing.com/vote/{0}/home", String.valueOf(123456)));
-    }
-
     /**
      * 首页登陆
      * @param request
@@ -137,5 +133,19 @@ public class VoteController {
 
         return "index";
     }
+
+    /**
+     * 首页登陆
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value ="/vote/1",method = {RequestMethod.GET})
+    public void test(HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.test");
+        //通过chainId 查询 发起人信息
+        campaignService.queryCampaignInfo(5910417230L);
+    }
+
+
 
 }

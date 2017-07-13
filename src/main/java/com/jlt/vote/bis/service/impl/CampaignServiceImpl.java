@@ -1,6 +1,7 @@
 package com.jlt.vote.bis.service.impl;
 
 
+import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.entity.Campaign;
 import com.jlt.vote.bis.service.ICampaignService;
 import com.jlt.vote.bis.vo.CampaignDetailVo;
@@ -37,13 +38,27 @@ public class CampaignServiceImpl implements ICampaignService {
 
 	@Override
 	public Campaign queryCampaignInfo(Long chainId) {
+		logger.debug("CampaignServiceImpl.queryCampaignInfo({})",chainId);
 		//通过memcache查询
+		Campaign campaign = null;
 		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId");
 		if(StringUtils.isNotEmpty(campaignJson)){
-
+			try {
+				campaign = JSON.parseObject(campaignJson,Campaign.class);
+			}catch (Exception e){
+				logger.error("CampaignServiceImpl.queryCampaignInfo from memcache error.",e);
+			}
 		}
-		QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
-		return baseDaoSupport.query(queryCamQb,Campaign.class);
+		if(campaign == null){
+			QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
+			campaign =  baseDaoSupport.query(queryCamQb,Campaign.class);
+			try {
+				cacheUtils.getCache().add(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId",JSON.toJSONString(campaign));
+			}catch (Exception e){
+				logger.error("CampaignServiceImpl.queryCampaignInfo save memcache error.campaign: " + campaign,e);
+			}
+		}
+		return campaign;
 	}
 
 	@Override
