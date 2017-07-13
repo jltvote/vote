@@ -1,5 +1,6 @@
 package com.jlt.vote.config;
 
+import com.xcrm.cache.CacheProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -55,6 +56,18 @@ public class SysConfig {
     @Value("${wxUserInfoUrl}")
     private String wxUserInfoUrl;
 
+    /**
+     * memcache的host配置
+     */
+    @Value("${cacheHost}")
+    private String cacheHost;
+
+    /**
+     * memcache的host配置
+     */
+    @Value("${cacheProvider}")
+    private String cacheProvider;
+
     public String getWxAuthUrl() {
         return wxAuthUrl;
     }
@@ -109,5 +122,21 @@ public class SysConfig {
 
     public void setWxUserInfoUrl(String wxUserInfoUrl) {
         this.wxUserInfoUrl = wxUserInfoUrl;
+    }
+
+    public String getCacheHost() {
+        return cacheHost;
+    }
+
+    public void setCacheHost(String cacheHost) {
+        this.cacheHost = cacheHost;
+    }
+
+    public String getCacheProvider() {
+        return cacheProvider;
+    }
+
+    public void setCacheProvider(String cacheProvider) {
+        this.cacheProvider = cacheProvider;
     }
 }

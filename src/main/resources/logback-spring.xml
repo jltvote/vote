@@ -34,7 +34,7 @@
     <!-- 开发环境 -->
     <springProfile name="develop">
         <root>
-            <level value="DEBUG"/>
+            <level value="INFO"/>
             <appender-ref ref="STDOUT"/>
         </root>
     </springProfile>
@@ -42,7 +42,7 @@
     <!-- 测试环境-->
     <springProfile name="test">
         <root>
-            <level value="DEBUG"/>
+            <level value="INFO"/>
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>
@@ -50,7 +50,7 @@
     <!-- 生产环境-->
     <springProfile name="product">
         <root>
-            <level value="DEBUG"/>
+            <level value="INFO"/>
             <appender-ref ref="FILE"/>
         </root>
     </springProfile>

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,16 +41,14 @@ public class VoteController {
     public void index(@PathVariable Long chainId,HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("VoteController.index({})",chainId);
 
-        String wxAuthUrl = sysConfig.getWxAuthUrl();
-
-        Map<String,Object> wxAuthPara = new HashMap<>();
-        wxAuthPara.put("appid",sysConfig.getWxAppId());
-        wxAuthPara.put("response_type","code");
-        wxAuthPara.put("scope","snsapi_userinfo");
-        wxAuthPara.put("redirect_uri",sysConfig.getWxCallbackUrl());
-        wxAuthPara.put("state",chainId+"#wechat_redirect");
-        wxAuthUrl = wxAuthUrl + HTTPUtil.parseUrlPara(wxAuthPara);
-        response.sendRedirect(wxAuthUrl);
+        StringBuffer wxAuthUrl = new StringBuffer(sysConfig.getWxAuthUrl());
+        wxAuthUrl.append("?appid="+sysConfig.getWxAppId());
+        wxAuthUrl.append("&redirect_uri="+ URLEncoder.encode(sysConfig.getWxCallbackUrl()));
+        wxAuthUrl.append("&response_type=code");
+        wxAuthUrl.append("&scope=snsapi_userinfo");
+        wxAuthUrl.append("&state="+chainId);
+        wxAuthUrl.append("#wechat_redirect");
+        response.sendRedirect(wxAuthUrl.toString());
     }
 
     /**
@@ -57,7 +56,7 @@ public class VoteController {
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/auth/callback",method = {RequestMethod.GET})
+    @RequestMapping(value ="/vote/auth/callback",method = {RequestMethod.GET})
     public void wxRedirect(String code, String state,HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("VoteController.wxRedirect({},{})",code,state);
         if(StringUtils.isNotBlank(code) && StringUtils.isNotBlank(state)) {
@@ -96,12 +95,19 @@ public class VoteController {
                             logger.error("WxAuthController.queryWxUser occurs error.chainId:{},openId:{},userInfoParaMap:{},errmsg:{}",
                                     chainId,openId,userInfoParaMap,errmsg);
                             ResponseUtils.createBadResponse(response,errmsg);
+                            return;
                         }
 
-                        logger.info("WxAuthController.queryWxUser user:" + resultMap);
+                        logger.info("WxAuthController.queryWxUser user:" + wxUserMap);
+                        String openid = MapUtils.getString(wxUserMap,"openid");
+                        String nickName = MapUtils.getString(wxUserMap,"nickname");
+                        String headImg = MapUtils.getString(wxUserMap,"headimgurl");
+                        String sex = MapUtils.getString(wxUserMap,"sex");
+
+
 
                         //保存用户信息到db
-                        String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), chainId);
+                        String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), String.valueOf(chainId));
                         logger.info("WxAuthController reirect url:" + redirectHomeUrl);
                         response.sendRedirect(response.encodeRedirectURL(redirectHomeUrl));
 
@@ -114,6 +120,10 @@ public class VoteController {
 
             }
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(MessageFormat.format("https://wx.jilunxing.com/vote/{0}/home", String.valueOf(123456)));
     }
 
 

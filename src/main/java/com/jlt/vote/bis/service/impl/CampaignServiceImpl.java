@@ -5,6 +5,7 @@ import com.jlt.vote.bis.entity.Campaign;
 import com.jlt.vote.bis.service.ICampaignService;
 import com.jlt.vote.bis.vo.CampaignDetailVo;
 import com.jlt.vote.bis.vo.UserDetailVo;
+import com.jlt.vote.util.CacheUtils;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
@@ -29,8 +30,13 @@ public class CampaignServiceImpl implements ICampaignService {
 	@Autowired
 	private BaseDaoSupport baseDaoSupport;
 
+	@Autowired
+	private CacheUtils cacheUtils;
+
 	@Override
 	public Campaign queryCampaignInfo(Long chainId) {
+		//通过memcache查询
+//		cacheUtils.getCache().get();
 		QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
 		return baseDaoSupport.query(queryCamQb,Campaign.class);
 	}
