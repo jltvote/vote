@@ -15,7 +15,7 @@ public interface CacheConstants {
 	/**
 	 * cache 投票活动id
      */
-	String VOTE_CAMPAIGN = "VOTE_CAMPAIGN_";
+	String CAMPAIGN = "CAMPAIGN_";
 
 	/**
 	 * cache 投票活动参与用户id

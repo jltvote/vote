@@ -10,12 +10,12 @@ if [ ! -d "/opt/vote/server" ];then
 fi;
 
 echo '==================move============'
-mv target/vote-0.0.1-SNAPSHOT.jar /opt/vote/server
+mv target/vote-1.0-SNAPSHOT.war /opt/vote/server
 cd /opt/vote/server
 
 echo ==================kill vote================
-ps -ef|grep vote-0.0.1-SNAPSHOT.jar|grep -v grep |awk '{print $2}'|xargs kill -9
+ps -ef|grep vote-1.0-SNAPSHOT.war|grep -v grep |awk '{print $2}'|xargs kill -9
 
 echo ==================start Bootstrap================
-nohup java -Xms128m -Xmx128m -XX:MaxPermSize=128M -XX:SurvivorRatio=3 -XX:NewRatio=1 -server -jar vote-0.0.1-SNAPSHOT.war --spring.profiles.active=product &
+nohup java -Xms128m -Xmx128m -XX:MaxPermSize=128M -XX:SurvivorRatio=3 -XX:NewRatio=1 -server -jar vote-1.0-SNAPSHOT.war --spring.profiles.active=product &
 tail -f $log_path/vote.log

@@ -104,8 +104,6 @@ public class VoteController {
                         String headImg = MapUtils.getString(wxUserMap,"headimgurl");
                         String sex = MapUtils.getString(wxUserMap,"sex");
 
-
-
                         //保存用户信息到db
                         String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), String.valueOf(chainId));
                         logger.info("WxAuthController reirect url:" + redirectHomeUrl);
@@ -125,7 +123,6 @@ public class VoteController {
     public static void main(String[] args) {
         System.out.println(MessageFormat.format("https://wx.jilunxing.com/vote/{0}/home", String.valueOf(123456)));
     }
-
 
     /**
      * 首页登陆

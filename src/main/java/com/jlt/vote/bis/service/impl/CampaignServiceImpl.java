@@ -5,6 +5,7 @@ import com.jlt.vote.bis.entity.Campaign;
 import com.jlt.vote.bis.service.ICampaignService;
 import com.jlt.vote.bis.vo.CampaignDetailVo;
 import com.jlt.vote.bis.vo.UserDetailVo;
+import com.jlt.vote.util.CacheConstants;
 import com.jlt.vote.util.CacheUtils;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
@@ -12,6 +13,7 @@ import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +38,10 @@ public class CampaignServiceImpl implements ICampaignService {
 	@Override
 	public Campaign queryCampaignInfo(Long chainId) {
 		//通过memcache查询
-//		cacheUtils.getCache().get();
+		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId");
+		if(StringUtils.isNotEmpty(campaignJson)){
+
+		}
 		QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
 		return baseDaoSupport.query(queryCamQb,Campaign.class);
 	}
