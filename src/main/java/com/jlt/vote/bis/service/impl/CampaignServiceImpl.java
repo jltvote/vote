@@ -44,6 +44,7 @@ public class CampaignServiceImpl implements ICampaignService {
 		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId");
 		if(StringUtils.isNotEmpty(campaignJson)){
 			try {
+				logger.info("CampaignServiceImpl.queryCampaignInfo query from memcache{}",campaignJson);
 				campaign = JSON.parseObject(campaignJson,Campaign.class);
 			}catch (Exception e){
 				logger.error("CampaignServiceImpl.queryCampaignInfo from memcache error.",e);
@@ -52,8 +53,10 @@ public class CampaignServiceImpl implements ICampaignService {
 		if(campaign == null){
 			QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
 			campaign =  baseDaoSupport.query(queryCamQb,Campaign.class);
+			logger.info("CampaignServiceImpl.queryCampaignInfo query from db{}",campaign);
 			try {
 				cacheUtils.getCache().add(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId",JSON.toJSONString(campaign),7200);
+				logger.info("CampaignServiceImpl.queryCampaignInfo save memcache{}",campaign);
 			}catch (Exception e){
 				logger.error("CampaignServiceImpl.queryCampaignInfo save memcache error.campaign: " + campaign,e);
 			}
