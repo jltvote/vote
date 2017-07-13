@@ -53,7 +53,7 @@ public class CampaignServiceImpl implements ICampaignService {
 			QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
 			campaign =  baseDaoSupport.query(queryCamQb,Campaign.class);
 			try {
-				cacheUtils.getCache().add(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId",JSON.toJSONString(campaign));
+				cacheUtils.getCache().add(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId",JSON.toJSONString(campaign),7200);
 			}catch (Exception e){
 				logger.error("CampaignServiceImpl.queryCampaignInfo save memcache error.campaign: " + campaign,e);
 			}
