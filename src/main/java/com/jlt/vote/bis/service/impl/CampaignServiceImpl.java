@@ -41,7 +41,7 @@ public class CampaignServiceImpl implements ICampaignService {
 		logger.debug("CampaignServiceImpl.queryCampaignInfo({})",chainId);
 		//通过memcache查询
 		Campaign campaign = null;
-		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId");
+		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+chainId);
 		if(StringUtils.isNotEmpty(campaignJson)){
 			try {
 				logger.info("CampaignServiceImpl.queryCampaignInfo query from memcache{}",campaignJson);
