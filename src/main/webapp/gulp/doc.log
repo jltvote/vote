@@ -1,0 +1,4 @@
+//打包压缩静态资源的处理
+//1: 初次使用请 执行 npm install --save
+//2: 将第三方的包进行忽略
+//3: 阿里云OSS 上传-gulp: https://cnpmjs.org/package/gulp-oss
