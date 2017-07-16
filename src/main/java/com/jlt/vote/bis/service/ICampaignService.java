@@ -5,6 +5,8 @@ import com.jlt.vote.bis.vo.CampaignDetailVo;
 import com.jlt.vote.bis.vo.UserDetailVo;
 import com.xcrm.common.page.Pagination;
 
+import java.util.Map;
+
 /**
  * 主办方服务
  * @Author gaoyan
@@ -13,16 +15,10 @@ import com.xcrm.common.page.Pagination;
 public interface ICampaignService {
 
 	/**
-	 * 查询活动信息
-	 * @param chainId 店铺标识
-	 */
-	Campaign queryCampaignInfo(Long chainId);
-
-	/**
 	 * 查询活动详情
 	 * @param chainId 店铺标识
 	 */
-	CampaignDetailVo queryCampaignDetail(Long chainId);
+	Map queryCampaignDetail(Long chainId);
 
 	/**
 	 * 查询用户列表信息
@@ -50,6 +46,12 @@ public interface ICampaignService {
 	 * @return
 	 */
 	Pagination queryUserGiftList(Long chainId,Long userId, Integer pageNo, Integer pageSize);
+
+	/**
+	 * 查询活动信息
+	 * @param chainId 店铺标识
+	 */
+	Campaign queryCampaignInfo(Long chainId);
 
 }
 

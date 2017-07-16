@@ -10,6 +10,7 @@ import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletCon
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * 内置服务server的相关配置
@@ -50,6 +51,21 @@ public class WebServerConfig {
         return new InitAnnotationEntity("com.jlt.vote");
     }
 
+    /**
+     * 内置tomcat服务的配置
+     * 线程池 ,连接数及超时时间配置
+     *
+     * @return
+     */
+    @Bean(name = "taskExecutor")
+    public ThreadPoolTaskExecutor createThreadPoolExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(3);
+        taskExecutor.setMaxPoolSize(100);
+        taskExecutor.setQueueCapacity(100);
+        taskExecutor.setKeepAliveSeconds(300);
+        return taskExecutor;
+    }
 
 
 }

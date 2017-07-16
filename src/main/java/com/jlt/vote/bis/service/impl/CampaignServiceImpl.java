@@ -1,23 +1,23 @@
 package com.jlt.vote.bis.service.impl;
 
-
-import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.entity.Campaign;
 import com.jlt.vote.bis.service.ICampaignService;
-import com.jlt.vote.bis.vo.CampaignDetailVo;
 import com.jlt.vote.bis.vo.UserDetailVo;
 import com.jlt.vote.util.CacheConstants;
-import com.jlt.vote.util.CacheUtils;
+import com.jlt.vote.util.RedisDaoSupport;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
 import com.xcrm.common.page.Pagination;
 import com.xcrm.log.Logger;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
 
 /**
  * 投票service
@@ -34,40 +34,50 @@ public class CampaignServiceImpl implements ICampaignService {
 	private BaseDaoSupport baseDaoSupport;
 
 	@Autowired
-	private CacheUtils cacheUtils;
+	private RedisDaoSupport redisDaoSupport;
+
+	@Autowired
+	private TaskExecutor taskExecutor;
+
 
 	@Override
-	public Campaign queryCampaignInfo(Long chainId) {
-		logger.debug("CampaignServiceImpl.queryCampaignInfo({})",chainId);
-		//通过memcache查询
-		Campaign campaign = null;
-		String campaignJson = cacheUtils.getCache().get(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+chainId);
-		if(StringUtils.isNotEmpty(campaignJson)){
-			try {
-				logger.info("CampaignServiceImpl.queryCampaignInfo query from memcache{}",campaignJson);
-				campaign = JSON.parseObject(campaignJson,Campaign.class);
-			}catch (Exception e){
-				logger.error("CampaignServiceImpl.queryCampaignInfo from memcache error.",e);
-			}
+	public Map queryCampaignDetail(Long chainId) {
+		Map<String ,Object> campaignMap = redisDaoSupport.hgetAll(CacheConstants.CAMPAIGN_BASE+chainId);
+		boolean isNeedSaveRedis = false;
+		if(MapUtils.isEmpty(campaignMap)){
+			isNeedSaveRedis = true;
+			Ssqb queryDetailSqb = Ssqb.create("com.jlt.vote.queryCampaignDetail").setParam("chainId",chainId);
+			campaignMap = baseDaoSupport.findForObj(queryDetailSqb,Map.class);
 		}
-		if(campaign == null){
-			QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
-			campaign =  baseDaoSupport.query(queryCamQb,Campaign.class);
-			logger.info("CampaignServiceImpl.queryCampaignInfo query from db{}",campaign);
-			try {
-				cacheUtils.getCache().add(CacheConstants.GROUP_VOTE+chainId,CacheConstants.CAMPAIGN+"chainId",JSON.toJSONString(campaign),7200);
-				logger.info("CampaignServiceImpl.queryCampaignInfo save memcache{}",campaign);
-			}catch (Exception e){
-				logger.error("CampaignServiceImpl.queryCampaignInfo save memcache error.campaign: " + campaign,e);
+		if(MapUtils.isNotEmpty(campaignMap)){
+			//浏览量 加载首页累计加1
+			int viewCount = MapUtils.getIntValue(campaignMap,"viewCount");
+			int incrViewCount = viewCount + 1;
+			campaignMap.put("viewCount",incrViewCount);
+			if(isNeedSaveRedis){
+				redisDaoSupport.hmset(CacheConstants.CAMPAIGN_BASE+chainId,campaignMap);
+			}else{
+				//缓存累加1
+				redisDaoSupport.hinc(CacheConstants.CAMPAIGN_BASE+chainId,"viewCount",1);
 			}
+			//数据库中浏览量异步加1
+			updateCampaignViewCount(chainId);
 		}
-		return campaign;
+		return campaignMap;
 	}
 
-	@Override
-	public CampaignDetailVo queryCampaignDetail(Long chainId) {
-		Ssqb queryDetailSqb = Ssqb.create("com.jlt.vote.queryCampaignDetail").setParam("chainId",chainId);
-		return baseDaoSupport.findForObj(queryDetailSqb,CampaignDetailVo.class);
+	/**
+	 * 活动浏览量增加1
+	 * @param chainId
+	 */
+	private void updateCampaignViewCount(Long chainId){
+		taskExecutor.execute(new Runnable() {
+                @Override
+		public void run() {
+			Ssqb updateSqb = Ssqb.create("com.jlt.vote.updateCampaignViewCount").setParam("chainId",chainId);
+			baseDaoSupport.updateByMybatis(updateSqb);
+		}
+	});
 	}
 
 	@Override
@@ -97,4 +107,12 @@ public class CampaignServiceImpl implements ICampaignService {
 				.setParam("pageSize",pageSize);
 		return baseDaoSupport.findForPage(queryUsersSqb);
 	}
+
+	@Override
+	public Campaign queryCampaignInfo(Long chainId) {
+		logger.debug("CampaignServiceImpl.queryCampaignInfo({})",chainId);
+		QueryBuilder queryCamQb = QueryBuilder.where(Restrictions.eq("chainId",chainId));
+		return baseDaoSupport.query(queryCamQb,Campaign.class);
+	}
+
 }

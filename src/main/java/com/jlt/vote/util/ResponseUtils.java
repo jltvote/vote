@@ -1,8 +1,7 @@
 package com.jlt.vote.util;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.log4j.Logger;
-
+import com.xcrm.log.Logger;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

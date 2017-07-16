@@ -4,11 +4,14 @@ import com.jlt.vote.bis.service.ICampaignService;
 import com.jlt.vote.config.SysConfig;
 import com.jlt.vote.util.HTTPUtil;
 import com.jlt.vote.util.ResponseUtils;
+import com.jlt.vote.validation.ValidateFiled;
+import com.jlt.vote.validation.ValidateGroup;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -126,12 +129,26 @@ public class VoteController {
      * @param response
      */
     @RequestMapping(value ="/vote/{chainId}/home",method = {RequestMethod.GET})
-    public String v_home(@PathVariable Long chainId, HttpServletRequest request, HttpServletResponse response){
+    public String v_home(@PathVariable Long chainId, HttpServletRequest request, HttpServletResponse response,ModelMap model){
         logger.info("VoteController.v_home,chainId:{}",chainId);
-//        //通过chainId 查询 发起人信息
-//        Campaign campaign = campaignService.queryCampaignInfo(chainId);
-
+        //通过chainId 查询 发起人信息
+        Map campaignDetail = campaignService.queryCampaignDetail(chainId);
+        model.addAttribute("campaignDetail", campaignDetail);
         return "index";
+    }
+
+    /**
+     * 首页用户列表
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 0, notNull = true, desc = "活动id"),
+            @ValidateFiled(index = 2, notNull = true, desc = "页码"),
+            @ValidateFiled(index = 3, notNull = true, desc = "页大小")})
+    @RequestMapping(value ="/vote/{chainId}/users",method = {RequestMethod.GET})
+    public void getVoteUserList(@PathVariable Long chainId,String queryKey, Integer pageNo, Integer pageSize, HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.getVoteUserList,chainId:{}",chainId);
+        ResponseUtils.createSuccessResponse(response,campaignService.querySimpleUserList(chainId,queryKey, pageNo, pageSize));
     }
 
     /**

@@ -2,26 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.jlt.vote" >
 
-    <resultMap id="CampaignDetailMap" type="com.jlt.vote.bis.vo.CampaignDetailVo">
+    <resultMap id="CampaignDetailMap" type="java.util.Map">
         <result property="sponsorPic" column="sponsorPic" />
         <result property="signCount" column="signCount" />
         <result property="voteCount" column="voteCount" />
         <result property="viewCount" column="viewCount" />
         <result property="startTime" column="startTime" />
+        <result property="endTime" column="endTime" />
         <result property="sponsorIntro" column="sponsorIntro" />
-        <result property="sponsorAddress" column="sponsorAddress" />
-        <result property="sponsorMobile" column="sponsorMobile" />
-        <collection property="SponsorPicVo" ofType="com.jlt.vote.bis.vo.SponsorPicVo">
+        <collection property="sponsorPicUrls" ofType="java.util.Map">
             <result property="picUrl" column="picUrl" />
             <result property="id" column="sponsorPicId" />
         </collection>
     </resultMap>
 
     <select id="queryCampaignDetail" resultMap="CampaignDetailMap">
-        SELECT a.sponsorPic,a.signCount,a.voteCount,a.viewCount,a.startTime,a.sponsorIntro,a.sponsorAddress,a.sponsorMobile,
-              b.picUrl,b.id AS sponsorPicId
+        SELECT a.sponsorPic,a.signCount,a.startTime,a.endTime,a.sponsorIntro,
+              b.picUrl,b.id AS sponsorPicId,c.viewCount,d.voteCount
         FROM t_t_campaign a
         LEFT JOIN t_t_sponsor_pic b ON a.chainId = b.chainId
+        LEFT JOIN t_t_campaign_view c ON a.chainId = c.chainId
+        LEFT JOIN t_t_campaign_vote d ON a.chainId = d.chainId
         WHERE a.dataStatus = 1 AND a.chainId = #{chainId}
         ORDER BY b.created ASC
     </select>
@@ -96,5 +97,11 @@
             LIMIT #{pageSize}
         </if>
     </select>
+    
+    <update id="updateCampaignViewCount">
+        UPDATE t_t_campaign_view
+        SET viewCount = viewCount + 1
+        WHERE chainId = #{chainId}
+    </update>
 
 </mapper>

@@ -1,6 +1,5 @@
 package com.jlt.vote.config;
 
-import com.xcrm.cache.CacheProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -57,16 +56,16 @@ public class SysConfig {
     private String wxUserInfoUrl;
 
     /**
-     * memcache的host配置
+     * redis的host配置
      */
-    @Value("${cacheHost}")
-    private String cacheHost;
+    @Value("${redisHost}")
+    private String redisHost;
 
     /**
-     * memcache的host配置
+     * redis的host配置
      */
-    @Value("${cacheProvider}")
-    private String cacheProvider;
+    @Value("${redisPort}")
+    private Integer redisPort;
 
     public String getWxAuthUrl() {
         return wxAuthUrl;
@@ -124,19 +123,19 @@ public class SysConfig {
         this.wxUserInfoUrl = wxUserInfoUrl;
     }
 
-    public String getCacheHost() {
-        return cacheHost;
+    public String getRedisHost() {
+        return redisHost;
     }
 
-    public void setCacheHost(String cacheHost) {
-        this.cacheHost = cacheHost;
+    public void setRedisHost(String redisHost) {
+        this.redisHost = redisHost;
     }
 
-    public String getCacheProvider() {
-        return cacheProvider;
+    public Integer getRedisPort() {
+        return redisPort;
     }
 
-    public void setCacheProvider(String cacheProvider) {
-        this.cacheProvider = cacheProvider;
+    public void setRedisPort(Integer redisPort) {
+        this.redisPort = redisPort;
     }
 }

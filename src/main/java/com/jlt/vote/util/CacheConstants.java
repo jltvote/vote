@@ -8,17 +8,28 @@ package com.jlt.vote.util;
 public interface CacheConstants {
 
 	/**
-	 * cache 投票组
+	 * cache 投票活动基本信息
+	 * 使用实例: C_BASE_{chainId}
 	 */
-	String GROUP_VOTE = "GROUP_VOTE_";
+	String CAMPAIGN_BASE = "cb_";
 
 	/**
-	 * cache 投票活动id
+	 * cache 投票活动参与用户详情
+	 * 使用实例:vud_{userId}
      */
-	String CAMPAIGN = "CAMPAIGN_";
+	String VOTE_USER_DETAIL = "vud_";
 
 	/**
-	 * cache 投票活动参与用户id
-     */
-	String VOTE_USER = "VOTE_USER_";
+	 * cache 投票活动参与用户图片列表
+	 * 使用实例:vup_{userId}
+	 */
+	String VOTE_USER_PICS = "vup_";
+
+	/**
+	 * cache 投票活动参与用户投票数
+	 * 使用实例:vuvc_{userId}
+	 */
+	String VOTE_USER_VOTE_COUNT = "vuvc_";
+
+
 }
