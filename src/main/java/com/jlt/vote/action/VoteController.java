@@ -152,6 +152,19 @@ public class VoteController {
     }
 
     /**
+     * 查询用户详情
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 0, notNull = true, desc = "活动id"),
+            @ValidateFiled(index = 1, notNull = true, desc = "用户id")})
+    @RequestMapping(value ="/vote/{chainId}/user",method = {RequestMethod.GET})
+    public void getVoteUserDetail(@PathVariable Long chainId,Long userId, HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.getVoteUserDetail,chainId:{},useId:{}",chainId,userId);
+        ResponseUtils.createSuccessResponse(response,campaignService.queryUserDetail(chainId,userId));
+    }
+
+    /**
      * 首页登陆
      * @param request
      * @param response

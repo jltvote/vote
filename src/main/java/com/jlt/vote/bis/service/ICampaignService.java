@@ -35,7 +35,7 @@ public interface ICampaignService {
 	 * @param userId 用户标识
 	 * @return
 	 */
-	UserDetailVo queryUserDetail(Long chainId, Long userId);
+	Map queryUserDetail(Long chainId, Long userId);
 
 	/**
 	 * 查询用户礼物列表

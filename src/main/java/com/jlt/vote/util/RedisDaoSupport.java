@@ -8,9 +8,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Tuple;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisDaoSupport {
 
 	@Autowired
-	private RedisTemplate<String,String> redisTemplate;
+	private RedisTemplate<String,Object> redisTemplate;
 
 	/**
 	 * 删除缓存<br>
@@ -58,7 +57,7 @@ public class RedisDaoSupport {
 	 * @return
 	 */
 	public Integer getInt(String key){
-		String value = String.valueOf(redisTemplate.boundValueOps(key).get());
+		String value = String.valueOf(get(key));
 		if(StringUtils.isNotBlank(value)){
 			return Integer.valueOf(value);
 		}
@@ -70,24 +69,17 @@ public class RedisDaoSupport {
 	 * @param key
 	 * @return
 	 */
-	public String getStr(String key){
-		return String.valueOf(redisTemplate.boundValueOps(key).get());
+	public Object get(String key){
+		return redisTemplate.boundValueOps(key).get();
 	}
-	
+
 	/**
-	 * 获取缓存<br>
-	 * 注：该方法暂不支持Character数据类型
-	 * @param key	key
-	 * @param clazz	类型
+	 * 取得缓存（List类型）
+	 * @param key
 	 * @return
 	 */
-	public <T> T get(String key, Class<T> clazz) {
-		String value = getStr(key);
-		if(StringUtils.isNotEmpty(value)){
-			return JSONObject.parseObject(value,clazz);
-		}else{
-			return null;
-		}
+	public <T> List<T> getList(String key,Class<T> tClass){
+		return (List<T>) get(key);
 	}
 	
 	/**
@@ -96,7 +88,7 @@ public class RedisDaoSupport {
 	 * @param value
 	 * @param expireTime 失效时间(秒)
 	 */
-	public void set(String key,String value,long  expireTime){
+	public void set(String key,Object value,long  expireTime){
 		redisTemplate.opsForValue().set(key, value);
 		if(expireTime > 0L){
 			redisTemplate.expire(key, expireTime, TimeUnit.SECONDS);
@@ -108,7 +100,7 @@ public class RedisDaoSupport {
 	 * @param key
 	 * @param value
 	 */
-	public void set(String key,String value){
+	public void set(String key,Object value){
 		set(key,value,0L);
 		redisTemplate.opsForValue().set(key, value,0);
 	}
@@ -141,7 +133,7 @@ public class RedisDaoSupport {
 	 * @param expireTime 失效时间(秒)
 	 */
 	public void setInt(String key, int value,long  expireTime) {
-		set(key,String.valueOf(value),expireTime);
+		set(key,value,expireTime);
 	}
 
 	/**
@@ -150,7 +142,7 @@ public class RedisDaoSupport {
 	 * @param value
 	 */
 	public void setInt(String key, int value) {
-		set(key,String.valueOf(value),0);
+		set(key,value,0);
 	}
 	
 	/**
@@ -168,7 +160,7 @@ public class RedisDaoSupport {
 	 * @param field map对应的key
 	 * @param value 	值
 	 */
-	public void hset(String key, String field, String value){
+	public void hset(String key, Object field, String value){
 		redisTemplate.opsForHash().put(key, field, value);
 	}
 
@@ -235,7 +227,7 @@ public class RedisDaoSupport {
 	 * @param key
 	 * @param value
 	 */
-	public void sadd(String key, String... value) {
+	public void sadd(String key, Object... value) {
 		redisTemplate.boundSetOps(key).add(value);
 	}
 
@@ -244,7 +236,7 @@ public class RedisDaoSupport {
 	 * @param key
 	 * @param value
 	 */
-	public void srem(String key, String... value) {
+	public void srem(String key, Object... value) {
 		redisTemplate.boundSetOps(key).remove(value);
 	}
 	
@@ -286,7 +278,7 @@ public class RedisDaoSupport {
 	 * @param count
 	 * @return
 	 */
-	public Set<ZSetOperations.TypedTuple<String>> zrevrangeByScoreWithScores(String key, final double min, final double max, final int offset, final int count) {
+	public Set<ZSetOperations.TypedTuple<Object>> zrevrangeByScoreWithScores(String key, final double min, final double max, final int offset, final int count) {
 		return redisTemplate.opsForZSet().reverseRangeByScoreWithScores(key, min, max, offset,count);
 	}
 
@@ -299,7 +291,7 @@ public class RedisDaoSupport {
 	 * @param count
 	 * @return
 	 */
-	public Set<String> zrevrangeByScore(String key, final double min, final double max, final int offset, final int count) {
+	public Set<Object> zrevrangeByScore(String key, final double min, final double max, final int offset, final int count) {
 		return redisTemplate.opsForZSet().reverseRangeByScore(key, min, max, offset,count);
 	}
 
@@ -310,7 +302,7 @@ public class RedisDaoSupport {
 	 * @param count
 	 * @return
 	 */
-	public Set<String> zrangeByOffset(String key, int offset, int count) {
+	public Set<Object> zrangeByOffset(String key, int offset, int count) {
 		return redisTemplate.opsForZSet().range(key, offset, offset + count);
 	}
 
@@ -321,7 +313,7 @@ public class RedisDaoSupport {
 	 * @param max
 	 * @return
 	 */
-	public Set<String> zrangeByScore(String key, double min, double max)  {
+	public Set<Object> zrangeByScore(String key, double min, double max)  {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max);
 	}
 
@@ -334,7 +326,7 @@ public class RedisDaoSupport {
 	 * @param count
 	 * @return
 	 */
-	public Set<String> zrangeByScore(String key, double min, double max, int offset, int count) {
+	public Set<Object> zrangeByScore(String key, double min, double max, int offset, int count) {
 		return redisTemplate.opsForZSet().rangeByScore(key, min, max,offset, count);
 
 	}

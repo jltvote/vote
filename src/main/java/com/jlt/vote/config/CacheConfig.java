@@ -54,7 +54,6 @@ public class CacheConfig extends CachingConfigurerSupport {
      * @param redisTemplate
      * @return
      */
-    @SuppressWarnings("rawtypes")
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
         return new RedisCacheManager(redisTemplate);
@@ -62,30 +61,57 @@ public class CacheConfig extends CachingConfigurerSupport {
         //rcm.setDefaultExpiration(60);//秒
     }
 
-    /**
-     * RedisTemplate配置
-     * @param factory
-     * @return
-     */
     @Bean
-    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
-        if(factory instanceof JedisConnectionFactory){
-            JedisConnectionFactory jedisConnectionFactory = (JedisConnectionFactory) factory;
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        if (connectionFactory instanceof JedisConnectionFactory) {
+            JedisConnectionFactory jedisConnectionFactory = (JedisConnectionFactory) connectionFactory;
             jedisConnectionFactory.getPoolConfig().setTestOnBorrow(true);
             jedisConnectionFactory.getPoolConfig().setTestWhileIdle(true);
             jedisConnectionFactory.getPoolConfig().setMinEvictableIdleTimeMillis(60000L);
             jedisConnectionFactory.getPoolConfig().setTimeBetweenEvictionRunsMillis(30000L);
             jedisConnectionFactory.getPoolConfig().setNumTestsPerEvictionRun(-1);
         }
-        StringRedisTemplate template = new StringRedisTemplate(factory);
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+        RedisTemplate<String, Object> template = new RedisTemplate<String, Object>();
+        template.setConnectionFactory(connectionFactory);
+        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<Object>(
+                Object.class);
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
-        template.setValueSerializer(jackson2JsonRedisSerializer);//如果key是String 需要配置一下StringSerializer,不然key会乱码 /XX/XX
+        template.setKeySerializer(template.getStringSerializer());
+        template.setValueSerializer(jackson2JsonRedisSerializer);
         template.setHashValueSerializer(jackson2JsonRedisSerializer);
         template.afterPropertiesSet();
         return template;
     }
+
+//    /**
+//     * RedisTemplate配置
+//     * @param factory
+//     * @return
+//     */
+//    @Bean
+//    public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) {
+//        if(factory instanceof JedisConnectionFactory){
+//            JedisConnectionFactory jedisConnectionFactory = (JedisConnectionFactory) factory;
+//            jedisConnectionFactory.getPoolConfig().setTestOnBorrow(true);
+//            jedisConnectionFactory.getPoolConfig().setTestWhileIdle(true);
+//            jedisConnectionFactory.getPoolConfig().setMinEvictableIdleTimeMillis(60000L);
+//            jedisConnectionFactory.getPoolConfig().setTimeBetweenEvictionRunsMillis(30000L);
+//            jedisConnectionFactory.getPoolConfig().setNumTestsPerEvictionRun(-1);
+//        }
+//        StringRedisTemplate template = new StringRedisTemplate(factory);
+//        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+//        ObjectMapper om = new ObjectMapper();
+//        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+//        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+//        jackson2JsonRedisSerializer.setObjectMapper(om);
+//        template.setValueSerializer(jackson2JsonRedisSerializer);//如果key是String 需要配置一下StringSerializer,不然key会乱码 /XX/XX
+//        template.setHashValueSerializer(jackson2JsonRedisSerializer);
+//        template.afterPropertiesSet();
+//        return template;
+//    }
+
+
 }

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.jlt.vote" >
 
-    <resultMap id="CampaignDetailMap" type="java.util.Map">
+    <resultMap id="CampaignDetailMap" type="com.jlt.vote.bis.vo.CampaignDetailVo">
         <result property="sponsorPic" column="sponsorPic" />
         <result property="signCount" column="signCount" />
         <result property="voteCount" column="voteCount" />
@@ -10,7 +10,7 @@
         <result property="startTime" column="startTime" />
         <result property="endTime" column="endTime" />
         <result property="sponsorIntro" column="sponsorIntro" />
-        <collection property="sponsorPicUrls" ofType="java.util.Map">
+        <collection property="sponsorPicUrls" ofType="com.jlt.vote.bis.vo.SponsorPicVo">
             <result property="picUrl" column="picUrl" />
             <result property="id" column="sponsorPicId" />
         </collection>
@@ -44,7 +44,7 @@
                     a.name like CONCAT('%',#{queryKey},'%') OR a.number like CONCAT('%',#{queryKey},'%')
                 </trim>
             </if>
-        ORDER BY a.priority DESC ,a.number DESC
+        ORDER BY a.voteCount DESC
         <if test="start != null and start >= 0 and pageSize != null and pageSize >= 0">
             LIMIT #{start},#{pageSize}
         </if>
@@ -60,21 +60,20 @@
         <result property="voteCount" column="voteCount" />
         <result property="viewCount" column="viewCount" />
         <result property="giftCount" column="giftCount" />
-        <result property="headPic" column="headPic" />
         <result property="name" column="name" />
-        <collection property="SponsorPicVo" ofType="com.jlt.vote.bis.vo.UserPicVo">
+        <collection property="userPicVos" ofType="com.jlt.vote.bis.vo.UserPicVo">
             <result property="picUrl" column="picUrl" />
             <result property="id" column="userPicId" />
         </collection>
     </resultMap>
 
     <select id="queryUserDetail" resultMap="UserDetailMap">
-        SELECT a.id AS userId,a.number,a.voteCount,a.viewCount,a.giftCount,a.headPic,a.name,
+        SELECT a.id AS userId,a.number,a.voteCount,a.viewCount,a.giftCount,a.name,
             b.picUrl,b.id AS userPicId
         FROM t_t_user a
         LEFT JOIN t_t_user_pic b ON a.chainId = b.chainId AND a.id = b.userId
         WHERE a.dataStatus = 1 AND a.chainId = #{chainId} AND a.id = #{userId}
-        ORDER BY b.priority DESC ,b.created ASC
+        ORDER BY b.created ASC
     </select>
 
     <resultMap id="UserGiftMap" type="com.jlt.vote.bis.vo.UserGiftVo">
