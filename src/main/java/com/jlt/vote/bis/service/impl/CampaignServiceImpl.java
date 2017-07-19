@@ -51,34 +51,26 @@ public class CampaignServiceImpl implements ICampaignService {
 	@Override
 	public Map queryCampaignDetail(Long chainId) {//redisDaoSupport.del(CacheConstants.CAMPAIGN_BASE+chainId);
 		Map<String ,Object> campaignMap = redisDaoSupport.hgetAll(CacheConstants.CAMPAIGN_BASE+chainId);
-		boolean isNeedSaveRedis = false;
 		if(MapUtils.isEmpty(campaignMap)){
-			isNeedSaveRedis = true;
 			Ssqb queryDetailSqb = Ssqb.create("com.jlt.vote.queryCampaignDetail").setParam("chainId",chainId);
 			CampaignDetailVo campaignDetail = baseDaoSupport.findForObj(queryDetailSqb,CampaignDetailVo.class);
 			campaignMap.put("sponsorPic",campaignDetail.getSponsorPic());
 			campaignMap.put("signCount",campaignDetail.getSignCount());
 			campaignMap.put("voteCount",campaignDetail.getVoteCount());
-			campaignMap.put("viewCount",campaignDetail.getViewCount());
 			campaignMap.put("startTime",campaignDetail.getStartTime());
 			campaignMap.put("sponsorIntro",campaignDetail.getSponsorIntro());
 			campaignMap.put("endTime",campaignDetail.getEndTime());
 			campaignMap.put("sponsorPicUrls",campaignDetail.getSponsorPicUrls());
-		}
-		if(MapUtils.isNotEmpty(campaignMap)){
+			campaignMap.put("viewCount",campaignDetail.getViewCount() + 1);
+			redisDaoSupport.hmset(CacheConstants.CAMPAIGN_BASE+chainId,campaignMap);
+		}else{
+			//缓存累加1
+			redisDaoSupport.hinc(CacheConstants.CAMPAIGN_BASE+chainId,"viewCount",1);
 			//浏览量 加载首页累计加1
-			int viewCount = MapUtils.getIntValue(campaignMap,"viewCount");
-			int incrViewCount = viewCount + 1;
-			campaignMap.put("viewCount",incrViewCount);
-			if(isNeedSaveRedis){
-				redisDaoSupport.hmset(CacheConstants.CAMPAIGN_BASE+chainId,campaignMap);
-			}else{
-				//缓存累加1
-				redisDaoSupport.hinc(CacheConstants.CAMPAIGN_BASE+chainId,"viewCount",1);
-			}
-			//数据库中浏览量异步加1
-			updateCampaignViewCount(chainId);
+			campaignMap.put("viewCount",MapUtils.getIntValue(campaignMap,"viewCount") + 1);
 		}
+		//数据库中浏览量异步加1
+		updateViewCount(chainId,1,null,null);
 		return campaignMap;
 	}
 
@@ -86,11 +78,15 @@ public class CampaignServiceImpl implements ICampaignService {
 	 * 活动浏览量增加1
 	 * @param chainId
 	 */
-	private void updateCampaignViewCount(Long chainId){
+	private void updateViewCount(Long chainId,Integer incrCampaignViewCount,Long userId,Integer incrUserViewCount){
 		taskExecutor.execute(new Runnable() {
                 @Override
 		public void run() {
-			Ssqb updateSqb = Ssqb.create("com.jlt.vote.updateCampaignViewCount").setParam("chainId",chainId);
+			Ssqb updateSqb = Ssqb.create("com.jlt.vote.updateCampaignViewCount")
+					.setParam("chainId",chainId)
+					.setParam("incrCampaignViewCount",incrCampaignViewCount)
+					.setParam("userId",userId)
+					.setParam("incrUserViewCount",incrUserViewCount);
 			baseDaoSupport.updateByMybatis(updateSqb);
 		}
 	});
@@ -120,16 +116,21 @@ public class CampaignServiceImpl implements ICampaignService {
 			result.put("number",userDetail.getNumber());
 			result.put("userId",userDetail.getUserId());
 			result.put("giftCount",userDetail.getGiftCount());
-			result.put("viewCount",userDetail.getViewCount());
-			result.put("voteCount",userDetail.getVoteCount());
-
+			result.put("viewCount",userDetail.getViewCount() + 1);
 			redisDaoSupport.set(CacheConstants.VOTE_USER_PICS+userId,userDetail.getUserPicVos());
 			redisDaoSupport.hmset(CacheConstants.VOTE_USER_DETAIL+userId,result);
 			result.put("userPicVos",userDetail.getUserPicVos());
 		}else{
+			//用户浏览量加1
+			redisDaoSupport.hinc(CacheConstants.VOTE_USER_DETAIL+chainId,"viewCount",1);
 			result.put("userPicVos",userPicList);
 			result.putAll(userDetailMap);
+			result.put("viewCount",MapUtils.getInteger(result,"viewCount") + 1);
 		}
+		//活动浏览量缓存累加2
+		redisDaoSupport.hinc(CacheConstants.CAMPAIGN_BASE+chainId,"viewCount",2);
+		//数据库中活动浏览量异步加2,用户浏览量加1
+		updateViewCount(chainId,2,userId,1);
 		return result;
 	}
 

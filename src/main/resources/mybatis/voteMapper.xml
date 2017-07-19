@@ -98,9 +98,10 @@
     </select>
     
     <update id="updateCampaignViewCount">
-        UPDATE t_t_campaign_view
-        SET viewCount = viewCount + 1
-        WHERE chainId = #{chainId}
+        UPDATE t_t_campaign_view a
+        LEFT JOIN t_t_user b ON a.chainId = b.chainId AND b.id = #{userId}
+        SET a.viewCount = a.viewCount + #{incrCampaignViewCount},b.viewCount = b.viewCount + #{incrUserViewCount}
+        WHERE a.chainId = #{chainId}
     </update>
 
 </mapper>

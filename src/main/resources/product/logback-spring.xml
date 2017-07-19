@@ -28,33 +28,8 @@
 
     <root>
         <level value="INFO"/>
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
-
-    <!-- 开发环境 -->
-    <springProfile name="develop">
-        <root>
-            <level value="INFO"/>
-            <appender-ref ref="STDOUT"/>
-        </root>
-    </springProfile>
-
-    <!-- 测试环境-->
-    <springProfile name="test">
-        <root>
-            <level value="INFO"/>
-            <appender-ref ref="FILE"/>
-        </root>
-    </springProfile>
-
-    <!-- 生产环境-->
-    <springProfile name="product">
-        <root>
-            <level value="INFO"/>
-            <appender-ref ref="FILE"/>
-        </root>
-    </springProfile>
-
 
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.hibernate.validator" level="WARN"/>
