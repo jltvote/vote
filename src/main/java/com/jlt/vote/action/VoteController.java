@@ -1,5 +1,6 @@
 package com.jlt.vote.action;
 
+import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.service.ICampaignService;
 import com.jlt.vote.config.SysConfig;
 import com.jlt.vote.util.HTTPUtil;
@@ -133,7 +134,8 @@ public class VoteController {
         logger.info("VoteController.v_home,chainId:{}",chainId);
         //通过chainId 查询 发起人信息
         Map campaignDetail = campaignService.queryCampaignDetail(chainId);
-        model.addAttribute("campaignDetail", campaignDetail);
+        campaignDetail.put("chainId",chainId);
+        model.addAttribute("campaignDetail", JSON.toJSONString(campaignDetail));
         return "index";
     }
 
