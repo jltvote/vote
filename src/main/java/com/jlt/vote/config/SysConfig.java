@@ -10,8 +10,14 @@ import org.springframework.context.annotation.PropertySource;
  * @Date: 2017/5/23
  */
 @Configuration
-@PropertySource("classpath:sys-config-${spring.profiles.active}.properties")
+@PropertySource("classpath:sys-config.properties")
 public class SysConfig {
+
+    /**
+     * 环境信息
+     */
+    @Value("${projectProfile}")
+    private String projectProfile;
 
     /**
      * 微信授权
@@ -137,5 +143,13 @@ public class SysConfig {
 
     public void setRedisPort(Integer redisPort) {
         this.redisPort = redisPort;
+    }
+
+    public String getProjectProfile() {
+        return projectProfile;
+    }
+
+    public void setProjectProfile(String projectProfile) {
+        this.projectProfile = projectProfile;
     }
 }
