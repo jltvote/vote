@@ -6,7 +6,7 @@ if [ ! -d "/opt/vote/server" ];then
 fi;
 
 echo '==================bak============'
-cp target/vote-1.0.war /opt/vote/server/vote-1.0-$(date +%y%m%d_ %H:%M:%S).war
+cp target/vote-1.0.war /opt/vote-bak/vote-1.0-$(date +%y%m%d_ %H:%M:%S).war
 
 echo ==================kill vote================
 ps -ef|grep Dcatalina.home=/opt/tomcat-vote|grep -v grep |awk '{print $2}'|xargs kill -9
