@@ -18,4 +18,4 @@ unzip target/vote-1.0.war -d /opt/web-vote/
 
 cd /opt/tomcat-vote/bin
 ./startup.sh
-tail -f ../log/catalina.$(date +%Y-%m-%d).out
+tail -f ../logs/catalina.$(date +%Y-%m-%d).out
