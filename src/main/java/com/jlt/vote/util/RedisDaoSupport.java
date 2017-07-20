@@ -74,6 +74,15 @@ public class RedisDaoSupport {
 	}
 
 	/**
+	 * 取得缓存（字符串类型）
+	 * @param key
+	 * @return
+	 */
+	public <T> T get(String key,Class<T> tClass){
+		return (T) redisTemplate.boundValueOps(key).get();
+	}
+
+	/**
 	 * 取得缓存（List类型）
 	 * @param key
 	 * @return

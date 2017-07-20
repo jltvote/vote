@@ -9,9 +9,27 @@ public interface CacheConstants {
 
 	/**
 	 * cache 投票活动基本信息
-	 * 使用实例: C_BASE_{chainId}
+	 * 使用实例: cb_{chainId}
 	 */
 	String CAMPAIGN_BASE = "cb_";
+
+	/**
+	 * cache 投票活动 奖品列表
+	 * 使用实例:ca_{chainId}
+	 */
+	String CAMPAIGN_AWARD = "ca_";
+
+	/**
+	 * cache 投票活动 奖品json信息
+	 * 使用实例:cg_{chainId}
+	 */
+	String CAMPAIGN_GIFT = "cg_";
+
+	/**
+	 * cache 投票活动 奖品详情
+	 * 使用实例:cgd_{giftId}
+	 */
+	String CAMPAIGN_GIFT_DETAIL = "cgd_";
 
 	/**
 	 * cache 投票活动参与用户详情

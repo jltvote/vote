@@ -1,10 +1,13 @@
 package com.jlt.vote.bis.service;
 
 import com.jlt.vote.bis.entity.Campaign;
+import com.jlt.vote.bis.entity.CampaignAward;
 import com.jlt.vote.bis.vo.CampaignDetailVo;
+import com.jlt.vote.bis.vo.CampaignGiftVo;
 import com.jlt.vote.bis.vo.UserDetailVo;
 import com.xcrm.common.page.Pagination;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +27,7 @@ public interface ICampaignService {
 	 * 保存微信用户信息
 	 * @param wxUserMap
 	 */
-	void saveVoter(String unionid,Map<String, Object> wxUserMap);
+	void saveVoter(Map<String, Object> wxUserMap);
 
 	/**
 	 * 查询用户列表信息
@@ -59,5 +62,18 @@ public interface ICampaignService {
 	 */
 	Campaign queryCampaignInfo(Long chainId);
 
+	/**
+	 * 查询活动奖品信息
+	 * @param chainId
+	 * @return
+	 */
+	List<CampaignAward> queryCampaignAward(Long chainId);
+
+	/**
+	 * 查询活动礼物信息
+	 * @param chainId
+	 * @return
+	 */
+	List<CampaignGiftVo> queryCampaignGiftList(Long chainId);
 }
 

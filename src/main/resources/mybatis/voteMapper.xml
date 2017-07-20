@@ -106,9 +106,9 @@
 
     <update id="updateVoter">
         INSERT INTO t_t_voter
-        (`openid`,`unionid`,`nickname`,`headimgurl`,`rawData`,`created`)
+        (`openid`,`nickname`,`headimgurl`,`rawData`,`created`)
         VALUES
-            (#{openid},#{unionid},#{nickname},#{headimgurl},#{rawData},now())
+            (#{openid},#{nickname},#{headimgurl},#{rawData},now())
         ON DUPLICATE KEY UPDATE
             `nickname` = #{nickname},
             `headimgurl` = #{headimgurl},
@@ -116,5 +116,11 @@
             `updated` = now()
     </update>
 
+    <select id="queryCampaignGiftList" resultType="com.jlt.vote.bis.vo.CampaignGiftVo">
+        SELECT a.id AS giftId,a.giftName,a.giftpic,a.giftPoint,a.voteCount
+        FROM t_t_campaign_gift a
+        WHERE a.dataStatus = 1 AND a.chainId = #{chainId}
+        ORDER BY a.giftPoint ASC
+    </select>
 
 </mapper>

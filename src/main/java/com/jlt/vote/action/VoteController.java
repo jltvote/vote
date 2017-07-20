@@ -85,7 +85,6 @@ public class VoteController {
                 }else{
                     String accessToken = MapUtils.getString(resultMap,"access_token");
                     String openId = MapUtils.getString(resultMap,"openid");
-                    String unionid = MapUtils.getString(resultMap,"unionid");
 
                     //获取用户信息
                     Map<String,Object> userInfoParaMap = new HashMap<>();
@@ -104,7 +103,7 @@ public class VoteController {
                         }
                         logger.info("WxAuthController.queryWxUser user:" + wxUserMap);
                         //保存用户信息到redis db
-                        campaignService.saveVoter(unionid,wxUserMap);
+                        campaignService.saveVoter(wxUserMap);
                         String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), String.valueOf(chainId));
                         logger.info("WxAuthController reirect url:" + redirectHomeUrl);
                         response.sendRedirect(response.encodeRedirectURL(redirectHomeUrl));
@@ -136,6 +135,32 @@ public class VoteController {
     }
 
     /**
+     * 查询活动奖品信息
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 0, notNull = true, desc = "活动id")})
+    @RequestMapping(value ="/vote/{chainId}/award",method = {RequestMethod.GET})
+    public void queryCampaignAward(@PathVariable Long chainId,HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.queryCampaignAward");
+        //通过chainId 查询 活动奖品信息
+        ResponseUtils.createSuccessResponse(response,campaignService.queryCampaignAward(chainId));
+    }
+
+    /**
+     * 查询活动礼物信息
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 0, notNull = true, desc = "活动id")})
+    @RequestMapping(value ="/vote/{chainId}/gift",method = {RequestMethod.GET})
+    public void queryCampaignGift(@PathVariable Long chainId,HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.queryCampaignAward");
+        //通过chainId 查询 活动礼物信息
+        ResponseUtils.createSuccessResponse(response,campaignService.queryCampaignGiftList(chainId));
+    }
+
+    /**
      * 首页用户列表
      * @param request
      * @param response
@@ -160,6 +185,21 @@ public class VoteController {
     public void getVoteUserDetail(@PathVariable Long chainId,Long userId, HttpServletRequest request, HttpServletResponse response){
         logger.info("VoteController.getVoteUserDetail,chainId:{},useId:{}",chainId,userId);
         ResponseUtils.createSuccessResponse(response,campaignService.queryUserDetail(chainId,userId));
+    }
+
+    /**
+     * 查询用户礼物列表
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 0, notNull = true, desc = "活动id"),
+            @ValidateFiled(index = 1, notNull = true, desc = "用户id"),
+            @ValidateFiled(index = 2, notNull = true, desc = "页码"),
+            @ValidateFiled(index = 3, notNull = true, desc = "页大小")})
+    @RequestMapping(value ="/vote/{chainId}/gifts",method = {RequestMethod.GET})
+    public void getUserGiftList(@PathVariable Long chainId,Long userId,Integer pageNo, Integer pageSize, HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.getUserGiftList,chainId:{},useId:{},pageNo:{},pageSize:{}",chainId,userId,pageNo,pageSize);
+        ResponseUtils.createSuccessResponse(response,campaignService.queryUserGiftList(chainId,userId,pageNo,pageSize));
     }
 
     /**

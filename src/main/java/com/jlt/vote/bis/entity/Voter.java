@@ -22,11 +22,6 @@ public class Voter {
   private String openid;
 
   /**
-   * 投票人 微信unionid
-   */
-  private String unionid;
-
-  /**
    * 昵称
    */
   private String nickname;
@@ -65,14 +60,6 @@ public class Voter {
 
   public void setOpenid(String openid) {
     this.openid = openid;
-  }
-
-  public String getUnionid() {
-    return unionid;
-  }
-
-  public void setUnionid(String unionid) {
-    this.unionid = unionid;
   }
 
   public String getNickname() {
