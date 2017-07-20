@@ -89,7 +89,7 @@ public class CampaignServiceImpl implements ICampaignService {
 			Map<String ,Object> voterMap = new HashMap<>();
 			voterMap.put("nickname",nickname);
 			voterMap.put("headimgurl",headimgurl);
-			voterMap.put("unionId",unionid);
+			voterMap.put("unionid",unionid);
 			redisDaoSupport.hmset(CacheConstants.VOTE_VOTER_DETAIL+openid,voterMap);
 			//异步保存db
 			taskExecutor.execute(new Runnable() {
@@ -97,9 +97,9 @@ public class CampaignServiceImpl implements ICampaignService {
 				public void run() {
 					Ssqb updateSqb = Ssqb.create("com.jlt.vote.updateVoter")
 							.setParam("openid",openid)
-							.setParam("unionId",unionid)
-							.setParam("nickName",nickname)
-							.setParam("headImg",headimgurl)
+							.setParam("unionid",unionid)
+							.setParam("nickname",nickname)
+							.setParam("headimgurl",headimgurl)
 							.setParam("rawData",JSON.toJSONString(wxUserMap));
 					baseDaoSupport.updateByMybatis(updateSqb);
 				}
@@ -136,7 +136,7 @@ public class CampaignServiceImpl implements ICampaignService {
 	}
 
 	@Override
-	public Map queryUserDetail(Long chainId, Long userId) {//redisDaoSupport.del(CacheConstants.VOTE_USER_DETAIL+userId);
+	public Map queryUserDetail(Long chainId, Long userId) {redisDaoSupport.hgetAll(CacheConstants.VOTE_VOTER_DETAIL+"oTMo21YNuO1BZqdPOIWGO1l6c5v0");
 		Map<String,Object> result = new HashMap<>();
 		Map<String,Object> userDetailMap = redisDaoSupport.hgetAll(CacheConstants.VOTE_USER_DETAIL+userId);
 		List userPicList = redisDaoSupport.getList(CacheConstants.VOTE_USER_PICS+userId, UserPicVo.class);

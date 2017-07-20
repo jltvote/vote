@@ -77,6 +77,7 @@ public class VoteController {
             Map<String,Object> resultMap = HTTPUtil.sendGet(sysConfig.getWxAuthTokenUrl(),outhTokenParaMap);
 
             if(MapUtils.isNotEmpty(resultMap)){
+                logger.info("WxAuthController.wxRedirect resultMap:" + resultMap);
                 if(StringUtils.isNotEmpty(MapUtils.getString(resultMap,"errmsg"))){
                     String errmsg = MapUtils.getString(resultMap,"errmsg","获取用户信息失败");
                     logger.error("VoteController.wxRedirect get token error :" + errmsg);
