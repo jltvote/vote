@@ -101,14 +101,9 @@ public class VoteController {
                             ResponseUtils.createBadResponse(response,errmsg);
                             return;
                         }
-
                         logger.info("WxAuthController.queryWxUser user:" + wxUserMap);
-                        String openid = MapUtils.getString(wxUserMap,"openid");
-                        String nickName = MapUtils.getString(wxUserMap,"nickname");
-                        String headImg = MapUtils.getString(wxUserMap,"headimgurl");
-                        String sex = MapUtils.getString(wxUserMap,"sex");
-
-                        //保存用户信息到db
+                        //保存用户信息到redis db
+                        campaignService.saveVoter(unionid,wxUserMap);
                         String redirectHomeUrl = MessageFormat.format(sysConfig.getWxRedirectUrl(), String.valueOf(chainId));
                         logger.info("WxAuthController reirect url:" + redirectHomeUrl);
                         response.sendRedirect(response.encodeRedirectURL(redirectHomeUrl));

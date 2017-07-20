@@ -26,10 +26,10 @@ public interface CacheConstants {
 	String VOTE_USER_PICS = "vup_";
 
 	/**
-	 * cache 投票活动参与用户投票数
-	 * 使用实例:vuvc_{userId}
+	 * cache 投票活动投票人信息
+	 * 使用实例:vvo_{openId}
 	 */
-	String VOTE_USER_VOTE_COUNT = "vuvc_";
+	String VOTE_VOTER_DETAIL = "vvd_";
 
 
 }

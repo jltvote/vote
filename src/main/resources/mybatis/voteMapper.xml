@@ -86,7 +86,7 @@
 
     <select id="queryUserGiftList" resultMap="UserGiftMap">
         SELECT a.headImgUrl,a.nickName,a.voteTime,a.giftCount,a.giftName
-        FROM t_t_user_gift a
+        FROM t_t_user_gift_record a
         WHERE a.dataStatus = 1 AND a.chainId = #{chainId} AND a.userId = #{userId}
         ORDER BY a.voteTime DESC
         <if test="start != null and start >= 0 and pageSize != null and pageSize >= 0">
@@ -103,5 +103,18 @@
         SET a.viewCount = a.viewCount + #{incrCampaignViewCount},b.viewCount = b.viewCount + #{incrUserViewCount}
         WHERE a.chainId = #{chainId}
     </update>
+
+    <update id="updateVoter">
+        INSERT INTO t_t_voter
+        (`openid`,`unionid`,`nickname`,`headimgurl`,`rawData`,`created`)
+        VALUES
+            (#{openid},#{unionid},#{nickname},#{headimgurl},#{rawData},now())
+        ON DUPLICATE KEY UPDATE
+            `nickname` = #{nickname},
+            `headimgurl` = #{headimgurl},
+            `rawData` = #{rawData},
+            `updated` = now()
+    </update>
+
 
 </mapper>

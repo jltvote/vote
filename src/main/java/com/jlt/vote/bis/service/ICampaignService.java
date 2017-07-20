@@ -21,6 +21,12 @@ public interface ICampaignService {
 	Map queryCampaignDetail(Long chainId);
 
 	/**
+	 * 保存微信用户信息
+	 * @param wxUserMap
+	 */
+	void saveVoter(String unionid,Map<String, Object> wxUserMap);
+
+	/**
 	 * 查询用户列表信息
 	 * @param chainId 店铺标识
 	 * @param pageNo
