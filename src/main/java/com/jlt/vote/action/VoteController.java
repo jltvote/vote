@@ -2,7 +2,10 @@ package com.jlt.vote.action;
 
 import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.service.ICampaignService;
+import com.jlt.vote.bis.vo.VotePrepayRequest;
 import com.jlt.vote.config.SysConfig;
+import com.jlt.vote.util.CommonConstants;
+import com.jlt.vote.util.CookieUtils;
 import com.jlt.vote.util.HTTPUtil;
 import com.jlt.vote.util.ResponseUtils;
 import com.jlt.vote.validation.ValidateFiled;
@@ -14,11 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
@@ -65,9 +71,6 @@ public class VoteController {
         logger.info("VoteController.wxRedirect({},{})",code,state);
         if(StringUtils.isNotBlank(code) && StringUtils.isNotBlank(state)) {
             Long chainId = Long.valueOf(state);
-
-
-
             //通过回调获取的code,获取授权的accessToken和openId
             Map<String,Object> outhTokenParaMap = new HashMap<>();
             outhTokenParaMap.put("appid",sysConfig.getWxAppId());
@@ -85,6 +88,12 @@ public class VoteController {
                 }else{
                     String accessToken = MapUtils.getString(resultMap,"access_token");
                     String openId = MapUtils.getString(resultMap,"openid");
+
+                    if(StringUtils.isNotBlank(openId)) {
+                        logger.debug("get openId from wx and save it to cookie, openId is ={}" ,openId);
+                        CookieUtils.addCookie(request, response, CommonConstants.WX_OPEN_ID_COOKIE
+                                , openId, null, sysConfig.getVoteCookieHost());
+                    }
 
                     //获取用户信息
                     Map<String,Object> userInfoParaMap = new HashMap<>();
@@ -202,18 +211,28 @@ public class VoteController {
         ResponseUtils.createSuccessResponse(response,campaignService.queryUserGiftList(chainId,userId,pageNo,pageSize));
     }
 
+    @RequestMapping(value = "/vote/v_pay", method = RequestMethod.GET)
+    public String v_pay(HttpServletRequest request,HttpServletResponse response,ModelMap model) {
+        logger.debug("--------------/vote/v_pay({})--------------------");
+
+        String openId = "";
+        Cookie cookie = CookieUtils.getCookie(request, CommonConstants.WX_OPEN_ID_COOKIE);
+        if (cookie != null) {
+            openId = cookie.getValue();
+        }
+        model.put("openId", openId);
+        return "gift";
+    }
+
     /**
-     * 首页登陆
+     * 投票活动预支付
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/vote/1",method = {RequestMethod.GET})
-    public void test(HttpServletRequest request, HttpServletResponse response){
-        logger.info("VoteController.test");
-        //通过chainId 查询 发起人信息
-        campaignService.queryCampaignInfo(5910417230L);
+    @RequestMapping(value ="/vote/prepay",method = {RequestMethod.POST})
+    public void votePrepay(@RequestBody @Valid VotePrepayRequest votePrepayRequest, HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.votePrepay({})",votePrepayRequest);
+        ResponseUtils.createSuccessResponse(response,votePrepayRequest);
     }
-
-
 
 }

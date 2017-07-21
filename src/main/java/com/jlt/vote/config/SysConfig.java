@@ -73,6 +73,13 @@ public class SysConfig {
     @Value("${redisPort}")
     private Integer redisPort;
 
+    /**
+     * redis的host配置
+     */
+    @Value("${voteCookieHost}")
+    private String voteCookieHost;
+
+
     public String getWxAuthUrl() {
         return wxAuthUrl;
     }
@@ -151,5 +158,13 @@ public class SysConfig {
 
     public void setProjectProfile(String projectProfile) {
         this.projectProfile = projectProfile;
+    }
+
+    public String getVoteCookieHost() {
+        return voteCookieHost;
+    }
+
+    public void setVoteCookieHost(String voteCookieHost) {
+        this.voteCookieHost = voteCookieHost;
     }
 }
