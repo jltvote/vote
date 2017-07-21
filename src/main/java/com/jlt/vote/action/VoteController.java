@@ -211,9 +211,9 @@ public class VoteController {
         ResponseUtils.createSuccessResponse(response,campaignService.queryUserGiftList(chainId,userId,pageNo,pageSize));
     }
 
-    @RequestMapping(value = "/vote/v_pay", method = RequestMethod.GET)
-    public String v_pay(HttpServletRequest request,HttpServletResponse response,ModelMap model) {
-        logger.debug("--------------/vote/v_pay({})--------------------");
+    @RequestMapping(value = "/vote/{chainId}/v_pay", method = RequestMethod.GET)
+    public String v_pay(@PathVariable Long chainId,HttpServletRequest request,HttpServletResponse response,ModelMap model) {
+        logger.debug("--------------/vote/v_pay({})--------------------",chainId);
 
         String openId = "";
         Cookie cookie = CookieUtils.getCookie(request, CommonConstants.WX_OPEN_ID_COOKIE);
@@ -221,6 +221,7 @@ public class VoteController {
             openId = cookie.getValue();
         }
         model.put("openId", openId);
+        model.put("chainId", chainId);
         return "gift";
     }
 
