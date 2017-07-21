@@ -60,6 +60,7 @@
         <result property="voteCount" column="voteCount" />
         <result property="viewCount" column="viewCount" />
         <result property="giftCount" column="giftCount" />
+        <result property="headPic" column="headPic" />
         <result property="name" column="name" />
         <collection property="userPicVos" ofType="com.jlt.vote.bis.vo.UserPicVo">
             <result property="picUrl" column="picUrl" />
@@ -68,7 +69,7 @@
     </resultMap>
 
     <select id="queryUserDetail" resultMap="UserDetailMap">
-        SELECT a.id AS userId,a.number,a.voteCount,a.viewCount,a.giftCount,a.name,
+        SELECT a.id AS userId,a.number,a.voteCount,a.viewCount,a.giftCount,a.name,a.headPic,
             b.picUrl,b.id AS userPicId
         FROM t_t_user a
         LEFT JOIN t_t_user_pic b ON a.chainId = b.chainId AND a.id = b.userId

@@ -137,7 +137,7 @@ public class CampaignServiceImpl implements ICampaignService {
 	}
 
 	@Override
-	public Map queryUserDetail(Long chainId, Long userId) {//redisDaoSupport.del(CacheConstants.VOTE_VOTER_DETAIL+"oTMo21YNuO1BZqdPOIWGO1l6c5v0");
+	public Map queryUserDetail(Long chainId, Long userId) {redisDaoSupport.hgetAll(CacheConstants.VOTE_USER_DETAIL+userId);
 		Map<String,Object> result = new HashMap<>();
 		Map<String,Object> userDetailMap = redisDaoSupport.hgetAll(CacheConstants.VOTE_USER_DETAIL+userId);
 		List userPicList = redisDaoSupport.getList(CacheConstants.VOTE_USER_PICS+userId, UserPicVo.class);
@@ -152,6 +152,7 @@ public class CampaignServiceImpl implements ICampaignService {
 			result.put("giftCount",userDetail.getGiftCount());
 			result.put("viewCount",userDetail.getViewCount() + 1);
 			result.put("voteCount",userDetail.getVoteCount());
+			result.put("headPic",userDetail.getHeadPic());
 			redisDaoSupport.set(CacheConstants.VOTE_USER_PICS+userId,userDetail.getUserPicVos());
 			redisDaoSupport.hmset(CacheConstants.VOTE_USER_DETAIL+userId,result);
 			result.put("userPicVos",userDetail.getUserPicVos());
