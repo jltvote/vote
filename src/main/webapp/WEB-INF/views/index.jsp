@@ -38,11 +38,11 @@
                                 <script src="/res/lib/js/axios.min.js"></script>
                                 <script src="/res/lib/js/vue.min.js"></script>
                                 <script src="/res/lib/js/vue-router.js"></script>
-                                <script src="/res/lib/js/axios.helper.js"></script>
+                                <script src="/res/lib/js/axios.helper.js?v=0001"></script>
 
 
 
-                                <script src="/res/page/js/index/index.js?v1"></script>
+                                <script src="/res/page/js/index/index.js?v=0001"></script>
 
                                 <script src="/res/page/js/app.js"></script>
 
