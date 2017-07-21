@@ -16,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -231,8 +232,13 @@ public class VoteController {
      * @param response
      */
     @RequestMapping(value ="/vote/prepay",method = {RequestMethod.POST})
-    public void votePrepay(@RequestBody @Valid VotePrepayRequest votePrepayRequest, HttpServletRequest request, HttpServletResponse response){
+    public void votePrepay(@RequestBody @Valid VotePrepayRequest votePrepayRequest,BindingResult bindingResult,
+                           HttpServletRequest request, HttpServletResponse response){
         logger.info("VoteController.votePrepay({})",votePrepayRequest);
+        if (bindingResult.hasErrors()) {
+            ResponseUtils.createValidFailResponse(response, bindingResult);
+            return;
+        }
         ResponseUtils.createSuccessResponse(response,votePrepayRequest);
     }
 
