@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.jlt.vote" >
 
-    <resultMap id="CampaignDetailMap" type="com.jlt.vote.bis.vo.CampaignDetailVo">
+    <resultMap id="CampaignDetailMap" type="com.jlt.vote.bis.campaign.vo.CampaignDetailVo">
         <result property="sponsorPic" column="sponsorPic" />
         <result property="signCount" column="signCount" />
         <result property="voteCount" column="voteCount" />
@@ -10,7 +10,7 @@
         <result property="startTime" column="startTime" />
         <result property="endTime" column="endTime" />
         <result property="sponsorIntro" column="sponsorIntro" />
-        <collection property="sponsorPicUrls" ofType="com.jlt.vote.bis.vo.SponsorPicVo">
+        <collection property="sponsorPicUrls" ofType="com.jlt.vote.bis.campaign.vo.SponsorPicVo">
             <result property="picUrl" column="picUrl" />
             <result property="id" column="sponsorPicId" />
         </collection>
@@ -27,7 +27,7 @@
         ORDER BY b.created ASC
     </select>
 
-    <resultMap id="SimpleUserMap" type="com.jlt.vote.bis.vo.SimpleUserVo">
+    <resultMap id="SimpleUserMap" type="com.jlt.vote.bis.campaign.vo.SimpleUserVo">
         <result property="number" column="number" />
         <result property="voteCount" column="voteCount" />
         <result property="headPic" column="headPic" />
@@ -54,7 +54,7 @@
     </select>
 
 
-    <resultMap id="UserDetailMap" type="com.jlt.vote.bis.vo.UserDetailVo">
+    <resultMap id="UserDetailMap" type="com.jlt.vote.bis.campaign.vo.UserDetailVo">
         <result property="userId" column="userId" />
         <result property="number" column="number" />
         <result property="voteCount" column="voteCount" />
@@ -62,7 +62,7 @@
         <result property="giftCount" column="giftCount" />
         <result property="headPic" column="headPic" />
         <result property="name" column="name" />
-        <collection property="userPicVos" ofType="com.jlt.vote.bis.vo.UserPicVo">
+        <collection property="userPicVos" ofType="com.jlt.vote.bis.campaign.vo.UserPicVo">
             <result property="picUrl" column="picUrl" />
             <result property="id" column="userPicId" />
         </collection>
@@ -77,7 +77,7 @@
         ORDER BY b.created ASC
     </select>
 
-    <resultMap id="UserGiftMap" type="com.jlt.vote.bis.vo.UserGiftVo">
+    <resultMap id="UserGiftMap" type="com.jlt.vote.bis.campaign.vo.UserGiftVo">
         <result property="headImgUrl" column="headImgUrl" />
         <result property="nickName" column="nickName" />
         <result property="voteTime" column="voteTime" />
@@ -117,7 +117,7 @@
             `updated` = now()
     </update>
 
-    <select id="queryCampaignGiftList" resultType="com.jlt.vote.bis.vo.CampaignGiftVo">
+    <select id="queryCampaignGiftList" resultType="com.jlt.vote.bis.campaign.vo.CampaignGiftVo">
         SELECT a.id AS giftId,a.giftName,a.giftpic,a.giftPoint,a.voteCount
         FROM t_t_campaign_gift a
         WHERE a.dataStatus = 1 AND a.chainId = #{chainId}
