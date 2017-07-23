@@ -4,6 +4,8 @@ import com.jlt.vote.bis.campaign.entity.Campaign;
 import com.jlt.vote.bis.campaign.entity.CampaignAward;
 import com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo;
 import com.jlt.vote.bis.campaign.vo.CampaignGiftVo;
+import com.jlt.vote.bis.campaign.vo.VoterVo;
+import com.jlt.vote.bis.wx.entity.UserGiftRecord;
 import com.xcrm.common.page.Pagination;
 
 import java.util.List;
@@ -27,6 +29,12 @@ public interface ICampaignService {
      * @param wxUserMap
      */
     void saveVoter(Map<String, Object> wxUserMap);
+
+    /**
+     * 查询微信用户信息
+     * @param openId
+     */
+    VoterVo queryVoter(String openId);
 
     /**
      * 查询用户列表信息
@@ -90,6 +98,20 @@ public interface ICampaignService {
      * @return
      */
     CampaignGiftDetailVo queryCampaignGiftDetail(Long chainId,Long giftId);
+
+    /**
+     * 保存礼物记录
+     * @param userGiftRecord
+     * @return
+     */
+    void saveUserGiftRecord(UserGiftRecord userGiftRecord);
+
+    /**
+     * 更新礼物记录
+     * @param orderId
+     * @return
+     */
+    void updateUserGiftRecord(Long orderId);
 
     /**
      * 删除所有redis的key

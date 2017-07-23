@@ -1,7 +1,9 @@
 package com.jlt.vote.bis.wx.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.jlt.vote.bis.campaign.service.ICampaignService;
 import com.jlt.vote.bis.wx.PayStatusEnum;
+import com.jlt.vote.bis.wx.entity.UserGiftRecord;
 import com.jlt.vote.bis.wx.entity.VotePayOrder;
 import com.jlt.vote.bis.wx.sdk.common.util.RandomStringGenerator;
 import com.jlt.vote.bis.wx.sdk.common.util.XmlObjectMapper;
@@ -13,8 +15,10 @@ import com.jlt.vote.bis.wx.sdk.pay.payment.bean.UnifiedOrderResponse;
 import com.jlt.vote.bis.wx.sdk.pay.util.SignatureUtil;
 import com.jlt.vote.bis.wx.service.IWxPayService;
 import com.jlt.vote.bis.wx.service.IWxService;
-import com.jlt.vote.bis.wx.vo.WxPayOrder;
+import com.jlt.vote.bis.wx.vo.GiftWxPrePayOrder;
+import com.jlt.vote.bis.wx.vo.WxPrePayOrder;
 import com.jlt.vote.config.SysConfig;
+import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.log.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,9 +27,7 @@ import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
@@ -52,26 +54,32 @@ public class WxServiceImpl implements IWxService {
 	private IWxPayService wxPayService;
 
     @Autowired
+    private ICampaignService campaignService;
+
+    @Autowired
+    private BaseDaoSupport baseDaoSupport;
+
+    @Autowired
     private SysConfig sysConfig;
 
 
 	@Override
-	public String jsOnPay(WxPayOrder wxPayOrder) throws Exception {
+	public String jsOnPay(GiftWxPrePayOrder giftWxPrePayOrder) throws Exception {
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
         String noncestr = RandomStringGenerator.getRandomStringByLength(16);
         //订单编号
-        String orderCode = wxPayOrder.getOrderCode();
+        String orderCode = giftWxPrePayOrder.getOrderCode();
         //支付订单流水号
         String payCode = wxPayService.getPayCode();
-
+        String openId = giftWxPrePayOrder.getOpenId();
         UnifiedOrderRequest unifiedOrderRequest = new UnifiedOrderRequest();
-        unifiedOrderRequest.setBody(wxPayOrder.getTitle());
+        unifiedOrderRequest.setBody(giftWxPrePayOrder.getTitle());
         unifiedOrderRequest.setTradeNumber(payCode);
-        unifiedOrderRequest.setTotalFee(getWxPayMoney(wxPayOrder.getPayMoney()));
+        unifiedOrderRequest.setTotalFee(getWxPayMoney(giftWxPrePayOrder.getPayMoney()));
         unifiedOrderRequest.setBillCreatedIp("127.0.0.1");
         unifiedOrderRequest.setNotifyUrl(sysConfig.getWxPayCallbackUrl());
         unifiedOrderRequest.setTradeType("JSAPI");
-        unifiedOrderRequest.setOpenId(wxPayOrder.getOpenId());
+        unifiedOrderRequest.setOpenId(openId);
         PaySetting paySetting = getPaySetting();
         UnifiedOrderResponse response = Payments.with(paySetting).unifiedOrder(unifiedOrderRequest);
 
@@ -83,17 +91,34 @@ public class WxServiceImpl implements IWxService {
         params2.put("signType", "MD5");
         String paySign = SignatureUtil.sign(params2, sysConfig.getWxMerchantKey());
         params2.put("paySign", paySign);
+
         //save db
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Long chainId = giftWxPrePayOrder.getChainId();
         VotePayOrder pay = new VotePayOrder();
-        pay.setBuyerId(wxPayOrder.getOpenId());
-        pay.setCreated(new Timestamp(System.currentTimeMillis()));
+        pay.setBuyerId(openId);
+        pay.setCreated(now);
         pay.setOrderCode(orderCode);
         pay.setPayCode(payCode);
-        pay.setPayMoney(wxPayOrder.getPayMoney());
+        pay.setPayMoney(giftWxPrePayOrder.getPayMoney());
         pay.setPayStatus(PayStatusEnum.WAIT_BUYER_PAY.value());
-        pay.setChainId(wxPayOrder.getChainId());
-        pay.setTitle(wxPayOrder.getTitle());
+        pay.setChainId(chainId);
+        pay.setTitle(giftWxPrePayOrder.getTitle());
         wxPayService.saveVotePayOrder(pay);
+
+        //保存礼物记录 打他Status= 0
+        UserGiftRecord userGiftRecord = new UserGiftRecord();
+        userGiftRecord.setChainId(chainId);
+        userGiftRecord.setDataStatus(false);
+        userGiftRecord.setGiftCount(giftWxPrePayOrder.getGiftCount());
+        userGiftRecord.setGiftId(giftWxPrePayOrder.getGiftId());
+        userGiftRecord.setGiftName(giftWxPrePayOrder.getGiftName());
+
+        userGiftRecord.setOpenId(openId);
+        userGiftRecord.setOrderId(pay.getId());
+        userGiftRecord.setUserId(giftWxPrePayOrder.getUserId());
+        userGiftRecord.setVoteTime(now);
+        campaignService.saveUserGiftRecord(userGiftRecord);
         return JSON.toJSONString(params2);
     }
 
@@ -124,11 +149,19 @@ public class WxServiceImpl implements IWxService {
             BigDecimal totalFee = BigDecimal.valueOf(paymentNotification.getTotalFee()).divide(BigDecimal.valueOf(100));
             BigDecimal cashFee = BigDecimal.valueOf(paymentNotification.getCashFee()).divide(BigDecimal.valueOf(100));
             String sellerId = paymentNotification.getMchId();
+
+            VotePayOrder votePayOrder = wxPayService.queryOrderByPayCode(payCode);
+            if (votePayOrder == null) {
+                //支付信息未找到
+                return RET_F;
+            }
+
             int result = wxPayService.updatePayForCallBack(payCode
                     , nonce
                     , tradeNo
                     , PayStatusEnum.TRADE_SUCCESS.value()
                     , paymentNotification.getOpenId()
+                    , votePayOrder.getPayMoney()
                     , totalFee
                     , cashFee
                     , paymentNotification.getTimeEndString()
@@ -136,14 +169,9 @@ public class WxServiceImpl implements IWxService {
                     , sellerId
                     , paymentNotification.getAppId()
                     , paymentNotification.getIsSubscribed());
-            if(result == -1){
-                //支付信息未找到
-                return RET_F;
-            }
 
             if(result > 0){
-                //回调业务处理
-//                super.paySuccess(pay.getOrderCode(), pay.getBizType());
+                campaignService.updateUserGiftRecord(votePayOrder.getId());
             }
             return RET_S;
         }catch(Exception e){

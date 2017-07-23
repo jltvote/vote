@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  * @Author gaoyan
  * @Date: 2017/7/22
  */    
-public class WxPayOrder implements Serializable {
+public class WxPrePayOrder implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

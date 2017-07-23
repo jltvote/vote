@@ -123,6 +123,12 @@
             `updated` = now()
     </update>
 
+    <select id="queryVoter" resultType="com.jlt.vote.bis.campaign.vo.VoterVo">
+        SELECT a.nickname,a.headimgurl
+        FROM t_t_voter a
+        WHERE a.openid = #{openid}
+    </select>
+
     <select id="queryCampaignGift" resultType="com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo">
         SELECT a.id AS giftId,a.giftName,a.giftpic,a.giftPoint,a.voteCount,a.giftFee
         FROM t_t_campaign_gift a
@@ -132,5 +138,11 @@
             </if>
         ORDER BY a.giftPoint ASC
     </select>
+
+    <update id="updateGiftRecord">
+        UPDATE t_t_user_gift_record a
+        SET a.dataStatus = 1
+        WHERE a.orderId = #{orderId} AND a.dataStatus = 0
+    </update>
 
 </mapper>

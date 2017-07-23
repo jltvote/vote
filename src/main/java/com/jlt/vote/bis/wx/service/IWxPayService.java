@@ -44,15 +44,15 @@ public interface IWxPayService {
      * @param tradeNo
      * @param value
      * @param buyerId
-     * @param totalFee
+     * @param payMoney
+     *@param totalFee
      * @param cashFee
      * @param timeEndString
      * @param bankType
      * @param sellerId
      * @param appId
-     * @param isSubscribed
-     * @return
+     * @param isSubscribed        @return
      */
-    int updatePayForCallBack(String payCode, String nonce, String tradeNo, String value, String buyerId, BigDecimal totalFee, BigDecimal cashFee, String timeEndString, String bankType, String sellerId, String appId, String isSubscribed);
+    int updatePayForCallBack(String payCode, String nonce, String tradeNo, String value, String buyerId, BigDecimal payMoney, BigDecimal totalFee, BigDecimal cashFee, String timeEndString, String bankType, String sellerId, String appId, String isSubscribed);
 }
 

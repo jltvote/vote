@@ -3,8 +3,10 @@ package com.jlt.vote.bis.campaign.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.campaign.entity.Campaign;
 import com.jlt.vote.bis.campaign.entity.CampaignAward;
+import com.jlt.vote.bis.campaign.entity.Voter;
 import com.jlt.vote.bis.campaign.service.ICampaignService;
 import com.jlt.vote.bis.campaign.vo.*;
+import com.jlt.vote.bis.wx.entity.UserGiftRecord;
 import com.jlt.vote.util.CacheConstants;
 import com.jlt.vote.util.RedisDaoSupport;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -16,6 +18,7 @@ import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.ListUtil;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
@@ -78,16 +81,16 @@ public class CampaignServiceImpl implements ICampaignService {
 	@Override
 	public void saveVoter(Map<String, Object> wxUserMap) {
 		String openid = MapUtils.getString(wxUserMap,"openid");
-		String nickname = MapUtils.getString(wxUserMap,"nickname");
-		String headimgurl = MapUtils.getString(wxUserMap,"headimgurl");
-		Map<String ,Object> voterDetailMap = redisDaoSupport.hgetAll(CacheConstants.VOTE_VOTER_DETAIL+openid);
-		if((MapUtils.isEmpty(voterDetailMap))
-				||(!Objects.equals(MapUtils.getString(voterDetailMap,"nickName"),nickname))
-				||(!Objects.equals(MapUtils.getString(voterDetailMap,"headimgurl"),headimgurl))){
-			Map<String ,Object> voterMap = new HashMap<>();
-			voterMap.put("nickname",nickname);
-			voterMap.put("headimgurl",headimgurl);
-			redisDaoSupport.hmset(CacheConstants.VOTE_VOTER_DETAIL+openid,voterMap);
+		String nickname = MapUtils.getString(wxUserMap,"nickname","");
+		String headimgurl = MapUtils.getString(wxUserMap,"headimgurl","");
+		VoterVo voterDetail = redisDaoSupport.get(CacheConstants.VOTE_VOTER_DETAIL+openid,VoterVo.class);
+		if((voterDetail == null)
+				||(!Objects.equals(voterDetail.getNickname(),nickname))
+				||(!Objects.equals(voterDetail.getHeadimgurl(),headimgurl))){
+			VoterVo voterVo = new VoterVo();
+			voterVo.setNickname(nickname);
+			voterVo.setHeadimgurl(headimgurl);
+			redisDaoSupport.set(CacheConstants.VOTE_VOTER_DETAIL+openid,voterVo);
 			//异步保存db
 			taskExecutor.execute(new Runnable() {
 				@Override
@@ -101,6 +104,20 @@ public class CampaignServiceImpl implements ICampaignService {
 				}
 			});
 		}
+	}
+
+	@Override
+	public VoterVo queryVoter(String openId) {
+		VoterVo voterDetail = redisDaoSupport.get(CacheConstants.VOTE_VOTER_DETAIL+openId,VoterVo.class);
+		if(voterDetail == null){
+			Ssqb querySqb = Ssqb.create("com.jlt.vote.queryVoter")
+					.setParam("openid",openId);
+			voterDetail = baseDaoSupport.findForObj(querySqb,VoterVo.class);
+			if(voterDetail != null){
+				redisDaoSupport.set(CacheConstants.VOTE_VOTER_DETAIL+openId,voterDetail);
+			}
+		}
+		return voterDetail;
 	}
 
 	/**
@@ -248,11 +265,30 @@ public class CampaignServiceImpl implements ICampaignService {
 					&&(detailVo.getGiftId() > 0)
 					&&(detailVo.getGiftPoint() > 0)
 					&&(detailVo.getVoteCount() > 0)
+					&&(detailVo.getGiftFee() != null)
 					&&(detailVo.getGiftFee().compareTo(BigDecimal.ZERO) > 0)){
 				redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT_DETAIL+giftId,detailVo);
 			}
 		}
 		return detailVo;
+	}
+
+	@Override
+	public void saveUserGiftRecord(UserGiftRecord userGiftRecord) {
+		String openId = userGiftRecord.getOpenId();
+		if(StringUtils.isNotEmpty(openId)){
+			VoterVo voterVo = queryVoter(openId);
+			userGiftRecord.setHeadImgUrl(voterVo.getHeadimgurl());
+			userGiftRecord.setNickName(voterVo.getNickname());
+		}
+		baseDaoSupport.save(userGiftRecord);
+	}
+
+	@Override
+	public void updateUserGiftRecord(Long orderId) {
+		Ssqb updateSqb = Ssqb.create("com.jlt.vote.updateGiftRecord")
+				.setParam("orderId",orderId);
+		baseDaoSupport.updateByMybatis(updateSqb);
 	}
 
 	@Override

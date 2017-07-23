@@ -1,37 +1,21 @@
 package com.jlt.vote.bis.wx.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.wx.PayStatusEnum;
 import com.jlt.vote.bis.wx.entity.VotePayOrder;
-import com.jlt.vote.bis.wx.sdk.common.util.RandomStringGenerator;
-import com.jlt.vote.bis.wx.sdk.common.util.XmlObjectMapper;
-import com.jlt.vote.bis.wx.sdk.pay.base.PaySetting;
-import com.jlt.vote.bis.wx.sdk.pay.payment.Payments;
-import com.jlt.vote.bis.wx.sdk.pay.payment.bean.PaymentNotification;
-import com.jlt.vote.bis.wx.sdk.pay.payment.bean.UnifiedOrderRequest;
-import com.jlt.vote.bis.wx.sdk.pay.payment.bean.UnifiedOrderResponse;
-import com.jlt.vote.bis.wx.sdk.pay.util.SignatureUtil;
 import com.jlt.vote.bis.wx.service.IWxPayService;
-import com.jlt.vote.bis.wx.vo.WxPayOrder;
-import com.jlt.vote.config.SysConfig;
-import com.jlt.vote.util.RedisDaoSupport;
+import com.jlt.vote.bis.wx.vo.WxPrePayOrder;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
 import com.xcrm.cloud.database.db.query.QueryBuilder;
 import com.xcrm.cloud.database.db.query.Ssqb;
 import com.xcrm.cloud.database.db.query.expression.Restrictions;
-import com.xcrm.log.Logger;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 微信service
@@ -85,7 +69,7 @@ public class WxPayServiceImpl implements IWxPayService {
         Long compareTime = System.currentTimeMillis() - MAX_PAY_INTERVAL;
         QueryBuilder query = QueryBuilder.where(Restrictions.ge("created", compareTime))
                 .and(Restrictions.eq("orderCode", orderCode));
-        int tooShortCount = baseDaoSupport.queryForInt(query, WxPayOrder.class);
+        int tooShortCount = baseDaoSupport.queryForInt(query, WxPrePayOrder.class);
         return tooShortCount > 0;
     }
 
@@ -98,16 +82,9 @@ public class WxPayServiceImpl implements IWxPayService {
 
     @Override
     public int updatePayForCallBack(String payCode, String nonce, String tradeNo, String tradeStatus, String buyerId,
-                                    BigDecimal totalFee, BigDecimal cashFee, String payTime, String bankType, String sellerId, String appId, String isSubscribed) {
-        Ssqb query = Ssqb.create("com.jlt.vote.wx.queryPayWithLock")
-                .setParam("payCode", payCode)
-                .setParam("dataStatus", 1);
-        VotePayOrder votePayOrder = baseDaoSupport.findForObj(query, VotePayOrder.class);
-        if (votePayOrder == null) {
-            return -1;
-        }
+                                    BigDecimal payMoney, BigDecimal totalFee, BigDecimal cashFee, String payTime, String bankType, String sellerId, String appId, String isSubscribed) {
 
-        if (votePayOrder.getPayMoney().compareTo(totalFee)==0) {
+        if (payMoney.compareTo(totalFee)==0) {
             Ssqb updateQuery = Ssqb.create("com.jlt.vote.wx.updatePayFromCallBack")
                     .setParam("appId", appId)
                     .setParam("bankType", bankType)

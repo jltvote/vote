@@ -1,11 +1,11 @@
 package com.jlt.vote.action;
 
-import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.campaign.service.ICampaignService;
 import com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo;
 import com.jlt.vote.bis.wx.service.IWxService;
+import com.jlt.vote.bis.wx.vo.GiftWxPrePayOrder;
 import com.jlt.vote.bis.wx.vo.VotePrepayRequest;
-import com.jlt.vote.bis.wx.vo.WxPayOrder;
+import com.jlt.vote.bis.wx.vo.WxPrePayOrder;
 import com.jlt.vote.config.SysConfig;
 import com.jlt.vote.util.*;
 import com.xcrm.common.util.InputStreamUtils;
@@ -163,27 +163,44 @@ public class WxController {
         }
         Long giftId = votePrepayRequest.getGiftId();
         Long chainId = votePrepayRequest.getChainId();
+        Integer giftCount = votePrepayRequest.getGiftCount();
         //查询礼物是否存在
         CampaignGiftDetailVo giftDetailVo = campaignService.queryCampaignGiftDetail(chainId,giftId);
         if(giftDetailVo == null){
             ResponseUtils.createBadResponse(response,"礼物不存在");
+            return;
+        }
+        BigDecimal giftFee = giftDetailVo.getGiftFee();
+        if((giftFee == null)||(giftFee.compareTo(BigDecimal.ZERO)<=0)){
+            ResponseUtils.createBadResponse(response,"礼物金额错误");
+            return;
+        }
+
+        if((giftCount == null)||(giftCount <= 0)){
+            giftCount = 1;
         }
 
         Long userId = votePrepayRequest.getUserId();
         boolean userExist = campaignService.checkUserExist(chainId,userId);
         if(!userExist){
             ResponseUtils.createBadResponse(response,"用户不存在");
+            return;
         }
 
-        WxPayOrder onPayOrder = new WxPayOrder();
-        onPayOrder.setChainId(5910417230L);
-        onPayOrder.setOrderCode(OrderCodeCreater.createTradeNO());
-        onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
-        onPayOrder.setTitle("礼物-"+giftDetailVo.getGiftName()+"支付");
-        onPayOrder.setPayMoney(BigDecimal.valueOf(0.01));
+        GiftWxPrePayOrder wxPrePayOrder = new GiftWxPrePayOrder();
+        wxPrePayOrder.setChainId(chainId);
+        wxPrePayOrder.setOrderCode(OrderCodeCreater.createTradeNO());
+        wxPrePayOrder.setOpenId(votePrepayRequest.getOpenid());
+        wxPrePayOrder.setTitle("礼物-"+giftDetailVo.getGiftName()+"支付");
+        wxPrePayOrder.setPayMoney(giftFee.multiply(BigDecimal.valueOf(giftCount)));
+        wxPrePayOrder.setGiftCount(giftCount);
+        wxPrePayOrder.setGiftId(giftId);
+        wxPrePayOrder.setGiftName(giftDetailVo.getGiftName());
+        wxPrePayOrder.setUserId(userId);
         HashMap<String,Object> resultMap = new HashMap<String,Object>();
         try {
-            String payResult = wxService.jsOnPay(onPayOrder);
+
+            String payResult = wxService.jsOnPay(wxPrePayOrder);
             resultMap.put("payResult", payResult);
         } catch (Exception e) {
             logger.error("VoteController.votePrepay error",e);
