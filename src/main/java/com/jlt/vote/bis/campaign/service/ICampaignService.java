@@ -2,6 +2,7 @@ package com.jlt.vote.bis.campaign.service;
 
 import com.jlt.vote.bis.campaign.entity.Campaign;
 import com.jlt.vote.bis.campaign.entity.CampaignAward;
+import com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo;
 import com.jlt.vote.bis.campaign.vo.CampaignGiftVo;
 import com.xcrm.common.page.Pagination;
 
@@ -45,6 +46,14 @@ public interface ICampaignService {
     Map queryUserDetail(Long chainId, Long userId);
 
     /**
+     * 校验活动用户是否存在
+     * @param chainId 店铺标识
+     * @param userId 用户标识
+     * @return
+     */
+    boolean checkUserExist(Long chainId, Long userId);
+
+    /**
      * 查询用户礼物列表
      * @param chainId 店铺标识
      * @param userId 用户id
@@ -73,5 +82,12 @@ public interface ICampaignService {
      * @return
      */
     List<CampaignGiftVo> queryCampaignGiftList(Long chainId);
+
+    /**
+     * 查询活动礼物信息
+     * @param chainId
+     * @return
+     */
+    CampaignGiftDetailVo queryCampaignGiftDetail(Long chainId,Long giftId);
 }
 

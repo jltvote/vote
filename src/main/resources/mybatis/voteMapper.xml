@@ -77,6 +77,12 @@
         ORDER BY b.created ASC
     </select>
 
+    <select id="queryUserCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM t_t_user a
+        WHERE a.dataStatus = 1 AND a.chainId = #{chainId} AND a.id = #{userId}
+    </select>
+
     <resultMap id="UserGiftMap" type="com.jlt.vote.bis.campaign.vo.UserGiftVo">
         <result property="headImgUrl" column="headImgUrl" />
         <result property="nickName" column="nickName" />
@@ -117,10 +123,13 @@
             `updated` = now()
     </update>
 
-    <select id="queryCampaignGiftList" resultType="com.jlt.vote.bis.campaign.vo.CampaignGiftVo">
-        SELECT a.id AS giftId,a.giftName,a.giftpic,a.giftPoint,a.voteCount
+    <select id="queryCampaignGift" resultType="com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo">
+        SELECT a.id AS giftId,a.giftName,a.giftpic,a.giftPoint,a.voteCount,a.giftFee
         FROM t_t_campaign_gift a
         WHERE a.dataStatus = 1 AND a.chainId = #{chainId}
+            <if test="giftId != null">
+                AND a.id = #{giftId}
+            </if>
         ORDER BY a.giftPoint ASC
     </select>
 

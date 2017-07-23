@@ -4,10 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.campaign.entity.Campaign;
 import com.jlt.vote.bis.campaign.entity.CampaignAward;
 import com.jlt.vote.bis.campaign.service.ICampaignService;
-import com.jlt.vote.bis.campaign.vo.CampaignDetailVo;
-import com.jlt.vote.bis.campaign.vo.CampaignGiftVo;
-import com.jlt.vote.bis.campaign.vo.UserDetailVo;
-import com.jlt.vote.bis.campaign.vo.UserPicVo;
+import com.jlt.vote.bis.campaign.vo.*;
 import com.jlt.vote.util.CacheConstants;
 import com.jlt.vote.util.RedisDaoSupport;
 import com.xcrm.cloud.database.db.BaseDaoSupport;
@@ -19,14 +16,14 @@ import com.xcrm.common.page.Pagination;
 import com.xcrm.common.util.ListUtil;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 投票service
@@ -169,6 +166,19 @@ public class CampaignServiceImpl implements ICampaignService {
 	}
 
 	@Override
+	public boolean checkUserExist(Long chainId, Long userId) {
+		Map<String,Object> userDetailMap = redisDaoSupport.hgetAll(CacheConstants.VOTE_USER_DETAIL+userId);
+		if(MapUtils.isEmpty(userDetailMap)){
+			Ssqb queryUserCountSqb = Ssqb.create("com.jlt.vote.queryUserCount")
+					.setParam("chainId",chainId)
+					.setParam("userId",userId);
+			int userCount = baseDaoSupport.findForInt(queryUserCountSqb);
+			return userCount >0;
+		}
+		return false;
+	}
+
+	@Override
 	public Pagination queryUserGiftList(Long chainId, Long userId, Integer pageNo, Integer pageSize) {
 		Ssqb queryUsersSqb = Ssqb.create("com.jlt.vote.queryUserGiftList")
 				.setParam("userId",userId)
@@ -204,17 +214,44 @@ public class CampaignServiceImpl implements ICampaignService {
 	public List<CampaignGiftVo> queryCampaignGiftList(Long chainId) {
 		List<CampaignGiftVo> campaignGiftList = redisDaoSupport.getList(CacheConstants.CAMPAIGN_GIFT+chainId,CampaignGiftVo.class);
 		if(ListUtil.isEmpty(campaignGiftList)){
-			Ssqb queryUsersSqb = Ssqb.create("com.jlt.vote.queryCampaignGiftList")
+			if(campaignGiftList == null){
+				campaignGiftList = new ArrayList<>();
+			}
+			Ssqb queryUsersSqb = Ssqb.create("com.jlt.vote.queryCampaignGift")
 					.setParam("chainId",chainId);
-			campaignGiftList = baseDaoSupport.findForList(queryUsersSqb,CampaignGiftVo.class);
-			redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT+chainId,campaignGiftList);
-			for (CampaignGiftVo campaignGiftVo : campaignGiftList) {
-				if((campaignGiftVo.getGiftId() > 0)&&(campaignGiftVo.getGiftPoint() > 0)&&(campaignGiftVo.getVoteCount() > 0)){
-					redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT_DETAIL+campaignGiftVo.getGiftId(),campaignGiftVo);
+			List<CampaignGiftDetailVo> campaignGiftDetailList = baseDaoSupport.findForList(queryUsersSqb,CampaignGiftDetailVo.class);
+			for (CampaignGiftDetailVo detailVo : campaignGiftDetailList) {
+				if((detailVo.getGiftId() > 0)
+						&&(detailVo.getGiftPoint() > 0)
+						&&(detailVo.getVoteCount() > 0)
+						&&(detailVo.getGiftFee().compareTo(BigDecimal.ZERO) > 0)){
+					redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT_DETAIL+detailVo.getGiftId(),detailVo);
+					CampaignGiftVo campaignGiftVo = new CampaignGiftVo();
+					BeanUtils.copyProperties(detailVo,campaignGiftVo);
+					campaignGiftList.add(campaignGiftVo);
 				}
 			}
+			redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT+chainId,campaignGiftList);
 		}
 		return campaignGiftList;
 	}
 
+	@Override
+	public CampaignGiftDetailVo queryCampaignGiftDetail(Long chainId,Long giftId) {
+		CampaignGiftDetailVo detailVo = redisDaoSupport.get(CacheConstants.CAMPAIGN_GIFT_DETAIL+giftId,CampaignGiftDetailVo.class);
+		if(detailVo == null){
+			Ssqb queryUsersSqb = Ssqb.create("com.jlt.vote.queryCampaignGift")
+					.setParam("chainId",chainId)
+					.setParam("giftId",giftId);
+			detailVo = baseDaoSupport.findForObj(queryUsersSqb,CampaignGiftDetailVo.class);
+			if((detailVo != null)
+					&&(detailVo.getGiftId() > 0)
+					&&(detailVo.getGiftPoint() > 0)
+					&&(detailVo.getVoteCount() > 0)
+					&&(detailVo.getGiftFee().compareTo(BigDecimal.ZERO) > 0)){
+				redisDaoSupport.set(CacheConstants.CAMPAIGN_GIFT_DETAIL+giftId,detailVo);
+			}
+		}
+		return detailVo;
+	}
 }

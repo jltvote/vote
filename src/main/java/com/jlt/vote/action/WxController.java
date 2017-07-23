@@ -1,6 +1,7 @@
 package com.jlt.vote.action;
 
 import com.jlt.vote.bis.campaign.service.ICampaignService;
+import com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo;
 import com.jlt.vote.bis.wx.service.IWxService;
 import com.jlt.vote.bis.wx.vo.VotePrepayRequest;
 import com.jlt.vote.bis.wx.vo.WxPayOrder;
@@ -12,12 +13,14 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -128,12 +131,26 @@ public class WxController {
         }
     }
 
+    @RequestMapping(value = "/vote/pay/{chainId}/v_pay", method = RequestMethod.GET)
+    public String v_pay(@PathVariable Long chainId,HttpServletRequest request,HttpServletResponse response,ModelMap model) {
+        logger.debug("--------------/vote/v_pay({})--------------------",chainId);
+
+        String openId = "";
+        Cookie cookie = CookieUtils.getCookie(request, CommonConstants.WX_OPEN_ID_COOKIE);
+        if (cookie != null) {
+            openId = cookie.getValue();
+        }
+        model.put("openId", openId);
+        model.put("chainId", chainId);
+        return "gift";
+    }
+
     /**
      * 投票活动预支付
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/vote/prepay",method = {RequestMethod.POST})
+    @RequestMapping(value ="/vote/pay/prepay",method = {RequestMethod.POST})
     public void votePrepay(@RequestBody @Valid VotePrepayRequest votePrepayRequest,BindingResult bindingResult,
                            HttpServletRequest request, HttpServletResponse response){
         logger.info("VoteController.votePrepay({})",votePrepayRequest);
@@ -141,11 +158,25 @@ public class WxController {
             ResponseUtils.createValidFailResponse(response, bindingResult);
             return;
         }
+        Long giftId = votePrepayRequest.getGiftId();
+        Long chainId = votePrepayRequest.getChainId();
+        //查询礼物是否存在
+        CampaignGiftDetailVo giftDetailVo = campaignService.queryCampaignGiftDetail(chainId,giftId);
+        if(giftDetailVo == null){
+            ResponseUtils.createBadResponse(response,"礼物不存在");
+        }
+
+        Long userId = votePrepayRequest.getUserId();
+        boolean userExist = campaignService.checkUserExist(chainId,userId);
+        if(!userExist){
+            ResponseUtils.createBadResponse(response,"用户不存在");
+        }
+
         WxPayOrder onPayOrder = new WxPayOrder();
         onPayOrder.setChainId(5910417230L);
         onPayOrder.setOrderCode(OrderCodeCreater.createTradeNO());
         onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
-        onPayOrder.setTitle("支付测试");
+        onPayOrder.setTitle("礼物-"+giftDetailVo.getGiftName()+"支付");
         onPayOrder.setPayMoney(BigDecimal.valueOf(0.01));
         HashMap<String,Object> resultMap = new HashMap<String,Object>();
         try {
