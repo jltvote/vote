@@ -30,10 +30,10 @@
               <form class="form-inline">
                 <div class="form-group">
                   <div class="col-xs-8" style="padding-right: 0;">
-                    <input type="text" class="form-control" placeholder="请输入编号或姓名">
+                    <input type="text" class="form-control" placeholder="请输入编号或姓名" maxlength="8" v-model="queryKey">
                   </div>
                   <div class="col-xs-4">
-                    <button type="submit" class="btn btn-default btn-block">搜索</button>
+                    <button type="button" class="btn btn-default btn-block" @click="">搜索</button>
                   </div>
                 </div>
               </form>
@@ -42,56 +42,18 @@
         </div>
         <div class="wrapper">
           <div id="masonry">
-            <div class="item">
-              <div class="item-num">编号：001号</div>
-              <div class="item-name">张三
+            <div class="item" v-for="item in userList">
+              <div class="item-num">编号：{{item.number}}号</div>
+              <div class="item-name">{{item.name}}
                 <div class="item-ticket-num"><span class="ticket-num">152</span>票</div>
               </div>
-              <img src="img/imt1.jpg">
-              
-                <a class="ticket-link">为TA拉票</a>
-              <div class="ticket-btn">
-                <a class="btn btn-block btn-red" href="member.html">给TA投票</a>
-              </div>
-            </div>
-            <div class="item">
-              <div class="item-num">编号：002号</div>
-              <div class="item-name">张三
-                <div class="item-ticket-num"><span class="ticket-num">152</span>票</div>
-              </div>
-              <img src="img/img2.jpg">
-              
-                <a class="ticket-link">为TA拉票</a>
-              <div class="ticket-btn">
-              <a class="btn btn-block btn-red" href="member.html">给TA投票</a>
-              </div>
+                <img :src="item.headPic"> 
+                <a class="ticket-link" href="javascript:;;">为TA拉票</a>
+                <div class="ticket-btn">
+                  <a class="btn btn-block btn-red" :href="'v_pay?userId='+item.userId">给TA投票</a>
+                </div>
             </div>
             
-            <div class="item">
-              <div class="item-num">编号：003号</div>
-              <div class="item-name">张三
-                <div class="item-ticket-num"><span class="ticket-num">152</span>票</div>
-              </div>
-              <img src="img/img3.jpg">
-              
-                <a class="ticket-link">为TA拉票</a>
-              <div class="ticket-btn">
-              <a class="btn btn-block btn-red" href="member.html">给TA投票</a>
-              </div>
-            </div>
-            
-            <div class="item">
-              <div class="item-num">编号：004号</div>
-              <div class="item-name">张三
-                <div class="item-ticket-num"><span class="ticket-num">152</span>票</div>
-              </div>
-              <img src="img/img4.jpg">
-              
-                <a class="ticket-link">为TA拉票</a>
-              <div class="ticket-btn">
-              <a class="btn btn-block btn-red" href="member.html">给TA投票</a>
-              </div>
-            </div>
           </div>
       </div>
     </div>
