@@ -2,7 +2,7 @@
     <template id="indexTemplateId">
       <div class="content">
         <div class="show-img"> 
-          <img src="/res/page/img/img.png"> 
+          <img :src="top.sponsorPic"> 
         </div>
         <div class="show-info">
           <ul>
@@ -30,10 +30,10 @@
               <form class="form-inline">
                 <div class="form-group">
                   <div class="col-xs-8" style="padding-right: 0;">
-                    <input type="text" class="form-control" placeholder="请输入编号或姓名" maxlength="8" v-model="queryKey">
+                    <input type="text" class="form-control" placeholder="请输入编号或姓名" maxlength="8"  v-model="queryKey">
                   </div>
                   <div class="col-xs-4">
-                    <button type="button" class="btn btn-default btn-block" @click="">搜索</button>
+                    <button type="button" class="btn btn-default btn-block" @click="rearch()">搜索</button>
                   </div>
                 </div>
               </form>

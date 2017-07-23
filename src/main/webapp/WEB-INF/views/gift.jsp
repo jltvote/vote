@@ -142,7 +142,7 @@
                 <script src="/res/lib/js/lodash.min.js"></script>
                 <script src="/res/lib/js/axios.min.js"></script>
                 <script src="/res/lib/js/axios.helper.js?v=0002"></script>
-                <script src="/res/page/js/pay/pay.js"></script>
+                <script src="/res/page/js/pay/pay.js?v=000012"></script>
 
             </body>
 

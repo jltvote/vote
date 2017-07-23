@@ -5,7 +5,8 @@
              top: {
                  signCount: 0,
                  viewCount: 0,
-                 voteCount: 0
+                 voteCount: 0,
+                 sponsorPic: ''
              },
              pagecfg: {
                  pageNo: 1,
@@ -20,10 +21,12 @@
          _this.top.signCount = campaignDetail.signCount || 0;
          _this.top.viewCount = campaignDetail.viewCount || 0;
          _this.top.voteCount = campaignDetail.voteCount || 0;
+         _this.top.sponsorPic = campaignDetail.sponsorPic || '';
          _this.ajaxData();
      },
      methods: {
          rearch: function() {
+             var _this = this;
              _this.pagecfg.pageNo = 1;
              _this.ajaxData();
          },

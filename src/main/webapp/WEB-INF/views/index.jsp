@@ -112,7 +112,7 @@
                                 <script src="/res/lib/js/jquery.min.js"></script>
                                 <script src="/res/lib/js/masonry-docs.min.js"></script>
 
-                                <script src="/res/page/js/index/index.js?v=0002"></script>
+                                <script src="/res/page/js/index/index.js?v=0003"></script>
 
                                 <script src="/res/page/js/app.js?v=001"></script>
 

@@ -174,8 +174,7 @@
                   _.forEach(liArr, function(item) {
                       opt.removeClass(item, 'active');
                   });
-                  opt.addClass(_this, 'active'); //单价1元，抵6票
-                  //document.getElementById('spanTotalTxt').innerHTML = '单价' + findItem.giftPoint + '元，抵6票';
+                  opt.addClass(_this, 'active');
                   cur = findItem;
               }
           },
@@ -191,8 +190,8 @@
                   }
                   orderId && (param.orderId = orderId);
                   console.log(param);
-                  mtAjax.get('/vote/prepay"', param, function(res) {
-                      var data = res.data;
+                  mtAjax.post('/vote/prepay', param, function(res) {
+                      var data = res.data.data;
                       if (data.status) {
                           orderId = data.orderId;
                           var item = data.data;
