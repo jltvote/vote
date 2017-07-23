@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -146,6 +147,7 @@ public class WxController {
         onPayOrder.setChainId(5910417230L);
         onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
         onPayOrder.setTitle("支付测试");
+        onPayOrder.setPayMoney(BigDecimal.ONE);
         HashMap<String,Object> resultMap = new HashMap<String,Object>();
         try {
             String payResult = wxService.jsOnPay(onPayOrder);
