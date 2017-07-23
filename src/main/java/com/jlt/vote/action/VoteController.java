@@ -1,10 +1,6 @@
 package com.jlt.vote.action;
 
-import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.campaign.service.ICampaignService;
-import com.jlt.vote.config.SysConfig;
-import com.jlt.vote.util.CommonConstants;
-import com.jlt.vote.util.CookieUtils;
 import com.jlt.vote.util.ResponseUtils;
 import com.jlt.vote.validation.ValidateFiled;
 import com.jlt.vote.validation.ValidateGroup;
@@ -16,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -38,10 +33,26 @@ public class VoteController {
     public String v_home(@PathVariable Long chainId, HttpServletRequest request, HttpServletResponse response,ModelMap model){
         logger.info("VoteController.v_home,chainId:{}",chainId);
         //通过chainId 查询 发起人信息
-        Map campaignDetail = campaignService.queryCampaignDetail(chainId);
+        Map<String ,Object> campaignDetail = campaignService.queryCampaignDetail(chainId);
         campaignDetail.put("chainId",chainId);
-        model.addAttribute("campaignDetail", JSON.toJSONString(campaignDetail));
+        model.putAll(campaignDetail);
         return "index";
+    }
+
+    /**
+     * 用户详情落地页
+     * @param request
+     * @param response
+     */
+    @ValidateGroup(fileds = { @ValidateFiled(index = 1, notNull = true, desc = "用户id")})
+    @RequestMapping(value ="/vote/{chainId}/v_user",method = {RequestMethod.GET})
+    public String v_user(@PathVariable Long chainId, Long userId,HttpServletRequest request, HttpServletResponse response,ModelMap model){
+        logger.info("VoteController.v_user({},{})",chainId,userId);
+        //通过chainId userId查询用户详情,同时用户热度+1,活动热度+2
+        Map<String,Object> userDetail = campaignService.queryUserDetail(chainId,userId);
+        userDetail.put("chainId",chainId);
+        model.putAll(userDetail);
+        return "user";
     }
 
     /**
@@ -111,5 +122,16 @@ public class VoteController {
         logger.info("VoteController.getUserGiftList,chainId:{},useId:{},pageNo:{},pageSize:{}",chainId,userId,pageNo,pageSize);
         ResponseUtils.createSuccessResponse(response,campaignService.queryUserGiftList(chainId,userId,pageNo,pageSize));
     }
+
+
+    @RequestMapping(value ="/redis/keys/delete",method = {RequestMethod.GET})
+    public void deleteRedisKeys(String auth, HttpServletRequest request, HttpServletResponse response){
+        logger.info("VoteController.deleteRedisKeys,deleteRedisKeys:{}",auth);
+        if(auth.equals("YNuO1BZqdPOIWGO1loTMo21Y")){
+            campaignService.deleteAllRedisKeys();
+        }
+        ResponseUtils.defaultSuccessResponse(response);
+    }
+
 
 }

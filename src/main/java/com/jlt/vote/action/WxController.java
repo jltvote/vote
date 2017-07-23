@@ -1,5 +1,6 @@
 package com.jlt.vote.action;
 
+import com.alibaba.fastjson.JSON;
 import com.jlt.vote.bis.campaign.service.ICampaignService;
 import com.jlt.vote.bis.campaign.vo.CampaignGiftDetailVo;
 import com.jlt.vote.bis.wx.service.IWxService;
@@ -132,9 +133,8 @@ public class WxController {
     }
 
     @RequestMapping(value = "/vote/pay/{chainId}/v_pay", method = RequestMethod.GET)
-    public String v_pay(@PathVariable Long chainId,HttpServletRequest request,HttpServletResponse response,ModelMap model) {
-        logger.debug("--------------/vote/v_pay({})--------------------",chainId);
-
+    public String v_pay(@PathVariable Long chainId,Long userId,HttpServletRequest request,HttpServletResponse response,ModelMap model) {
+        logger.debug("--------------/vote/v_pay({},{})--------------------",chainId,userId);
         String openId = "";
         Cookie cookie = CookieUtils.getCookie(request, CommonConstants.WX_OPEN_ID_COOKIE);
         if (cookie != null) {
@@ -142,6 +142,9 @@ public class WxController {
         }
         model.put("openId", openId);
         model.put("chainId", chainId);
+        //通过chainId userId查询用户详情,同时用户热度+1,活动热度+2
+        Map<String,Object> userDetail = campaignService.queryUserDetail(chainId,userId);
+        model.putAll(userDetail);
         return "gift";
     }
 
@@ -193,7 +196,7 @@ public class WxController {
      * @param request
      * @param response
      */
-        @RequestMapping(value ="/vote/pay/callback",method = {RequestMethod.POST})
+    @RequestMapping(value ="/vote/pay/callback",method = {RequestMethod.POST})
     public void wxPayCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String xml = InputStreamUtils.InputStreamTOString(request.getInputStream(), "UTF-8");
@@ -203,6 +206,7 @@ public class WxController {
             logger.error("wxAuthReceive occurs exception ",e);
         }
     }
+
 
 
 }

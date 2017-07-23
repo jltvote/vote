@@ -20,7 +20,7 @@ public interface ICampaignService {
      * 查询活动详情
      * @param chainId 店铺标识
      */
-    Map queryCampaignDetail(Long chainId);
+    Map<String ,Object> queryCampaignDetail(Long chainId);
 
     /**
      * 保存微信用户信息
@@ -39,11 +39,12 @@ public interface ICampaignService {
 
     /**
      * 查询用户详情
+     * 活动 用户热度增加加
      * @param chainId 店铺标识
      * @param userId 用户标识
      * @return
      */
-    Map queryUserDetail(Long chainId, Long userId);
+    Map<String,Object> queryUserDetail(Long chainId, Long userId);
 
     /**
      * 校验活动用户是否存在
@@ -89,5 +90,10 @@ public interface ICampaignService {
      * @return
      */
     CampaignGiftDetailVo queryCampaignGiftDetail(Long chainId,Long giftId);
+
+    /**
+     * 删除所有redis的key
+     */
+    void deleteAllRedisKeys();
 }
 
