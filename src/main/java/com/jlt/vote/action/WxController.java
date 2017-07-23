@@ -146,8 +146,10 @@ public class WxController {
         onPayOrder.setChainId(5910417230L);
         onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
         onPayOrder.setTitle("支付测试");
+        HashMap<String,Object> resultMap = new HashMap<String,Object>();
         try {
-            wxService.jsOnPay(onPayOrder);
+            String payResult = wxService.jsOnPay(onPayOrder);
+            resultMap.put("payResult", payResult);
         } catch (Exception e) {
             logger.error("VoteController.votePrepay error",e);
         }
