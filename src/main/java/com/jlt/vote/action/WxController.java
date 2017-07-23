@@ -5,10 +5,8 @@ import com.jlt.vote.bis.wx.service.IWxService;
 import com.jlt.vote.bis.wx.vo.VotePrepayRequest;
 import com.jlt.vote.bis.wx.vo.WxPayOrder;
 import com.jlt.vote.config.SysConfig;
-import com.jlt.vote.util.CommonConstants;
-import com.jlt.vote.util.CookieUtils;
-import com.jlt.vote.util.HTTPUtil;
-import com.jlt.vote.util.ResponseUtils;
+import com.jlt.vote.util.*;
+import com.xcrm.common.util.InputStreamUtils;
 import com.xcrm.log.Logger;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -145,6 +143,7 @@ public class WxController {
         }
         WxPayOrder onPayOrder = new WxPayOrder();
         onPayOrder.setChainId(5910417230L);
+        onPayOrder.setOrderCode(OrderCodeCreater.createTradeNO());
         onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
         onPayOrder.setTitle("支付测试");
         onPayOrder.setPayMoney(BigDecimal.ONE);
@@ -156,6 +155,22 @@ public class WxController {
             logger.error("VoteController.votePrepay error",e);
         }
         ResponseUtils.createSuccessResponse(response,resultMap);
+    }
+
+    /**
+     * 微信支付回调
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value ="/vote/pay/callback",method = {RequestMethod.POST})
+    public void wxPayCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            String xml = InputStreamUtils.InputStreamTOString(request.getInputStream(), "UTF-8");
+            logger.info("~~~~~~~~~~~~~~~~~~request_para_detail_xml:" + xml);
+            wxService.optWxPayCallback(xml);
+        } catch (Exception e) {
+            logger.error("wxAuthReceive occurs exception ",e);
+        }
     }
 
 

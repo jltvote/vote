@@ -1,7 +1,6 @@
 package com.jlt.vote.bis.wx.service;
 
 
-import com.jlt.vote.bis.wx.sdk.pay.base.PaySetting;
 import com.jlt.vote.bis.wx.vo.WxPayOrder;
 
 /**
@@ -18,5 +17,10 @@ public interface IWxService {
      */
     String jsOnPay(WxPayOrder onPayOrder) throws Exception;
 
+    /**
+     * 处理微信支付回调
+     * @param xml
+     */
+    String optWxPayCallback(String xml);
 }
 

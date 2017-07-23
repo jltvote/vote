@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.jlt.wx" >
+<mapper namespace="com.jlt.vote.wx" >
+    <select id="queryPayWithLock" resultType="com.jlt.vote.bis.wx.entity.VotePayOrder">
+        SELECT id,notifyId,payMoney
+        FROM t_t_vote_pay_order
+        WHERE payCode=#{payCode} AND dataStatus = 1 FOR UPDATE
+    </select>
 
-
+    <update id="updatePayFromCallBack">
+        UPDATE t_t_vote_pay_order
+        SET
+        notifyId=#{notifyId},
+        payStatus=#{payStatus},
+        tradeNo=#{tradeNo},
+        tradeStatus=#{tradeStatus},
+        buyerId=#{buyerId},
+        totalFee=#{totalFee},
+        cashFee=#{cashFee},
+        payTime=#{payTime},
+        bankType=#{bankType},
+        sellerId=#{sellerId},
+        appId=#{appId},
+        isSubscribe=#{isSubscribe}
+        WHERE payCode=#{payCode} AND payStatus='WAIT_BUYER_PAY'
+    </update>
 </mapper>
