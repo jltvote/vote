@@ -76,6 +76,7 @@
                 </script>
                 <div id="appContent">
                     <router-view></router-view>
+
                 </div>
 
                 <div class="loading-bg" id="divLoading" style="display:none;">
@@ -106,15 +107,15 @@
                                 <script src="/res/lib/js/axios.min.js"></script>
                                 <script src="/res/lib/js/vue.min.js"></script>
                                 <script src="/res/lib/js/vue-router.js"></script>
-                                <script src="/res/lib/js/axios.helper.js?v=0001"></script>
-                                <script src="/res/lib/js/vote_helper.js"></script>
+                                <script src="/res/lib/js/axios.helper.js?v=0004"></script>
+                                <script src="/res/lib/js/vote_helper.js?v=0004"></script>
 
                                 <script src="/res/lib/js/jquery.min.js"></script>
                                 <script src="/res/lib/js/masonry-docs.min.js"></script>
 
-                                <script src="/res/page/js/index/index.js?v=0003"></script>
+                                <script src="/res/page/js/index/index.js?v=0004"></script>
 
-                                <script src="/res/page/js/app.js?v=001"></script>
+                                <script src="/res/page/js/app.js?v=0004"></script>
 
                                 <!-- endbuild -->
 

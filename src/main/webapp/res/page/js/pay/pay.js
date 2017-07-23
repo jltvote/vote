@@ -57,7 +57,6 @@
       }
   })();
   var giftModule = (function() {
-      var openId = '';
       var userId = '';
       var chainId = '';
       var giftList = [];
@@ -188,13 +187,10 @@
                       giftCount: document.getElementById('selectCnt').value,
                       openid: openId
                   }
-                  orderId && (param.orderId = orderId);
                   console.log(param);
-                  mtAjax.post('/vote/prepay', param, function(res) {
-                      var data = res.data.data;
-                      if (data.status) {
-                          orderId = data.orderId;
-                          var item = data.data;
+                  vote.jqAjax('/vote/prepay', param, function(res) {
+                      if (res.status) {
+                          var item = res.data;
                           var payResult = JSON.parse(item.payResult);
                           console.log('payResult', ':', payResult);
                           var _appid = payResult.appId;
@@ -210,7 +206,7 @@
                                   "nonceStr": _nonceStr,
                                   "package": _package,
                                   "signType": _signType,
-                                  "paySign": _item.paySign
+                                  "paySign": _paySign
                               },
                               function(res) {
                                   opt.loading.hide();
@@ -235,7 +231,7 @@
                       }
                   }, function(err) {
                       opt.loading.hide();
-                  });
+                  }, 'POST', false);
               } else {
                   message.msg('请选择要购买的礼物.');
               }

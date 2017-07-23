@@ -40,6 +40,7 @@
             </div>
           </div>
         </div>
+        
         <div class="wrapper">
           <div id="masonry">
             <div class="item" v-for="item in userList">
@@ -53,8 +54,10 @@
                   <a class="btn btn-block btn-red" :href="'v_pay?userId='+item.userId">给TA投票</a>
                 </div>
             </div>
-            
           </div>
-      </div>
+        </div>
+
+        
+        
     </div>
 </template>

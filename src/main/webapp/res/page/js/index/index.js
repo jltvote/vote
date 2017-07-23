@@ -37,7 +37,7 @@
                  pageNo: _this.pagecfg.pageNo,
                  pageSize: _this.pagecfg.pageSize
              }
-             param.queryKey && (param.queryKey = _this.queryKey);
+             _this.queryKey && (param.queryKey = _this.queryKey);
 
              mtAjax.get('users', param, function(res) {
                      var data = res.data; // {states:1,msg:'',data:{}}
@@ -45,13 +45,14 @@
                      if (data.status) {
                          if (_this.pagecfg.pageNo == 1) {
                              _this.userList.length > 0 && (_this.userList = []);
-                             if (data.data.list.length < _this.pagecfg.pageSize) {
+                             if (data.data.list.length === 0) {
                                  _this.pagecfg.pageNo--;
                              }
                          } else {
                              _this.pagecfg.pageNo++;
                          }
-                         _this.userList = _this.userList.concat(data.data.list);
+                         var tempArr = _.clone(_this.userList, true);
+                         _this.userList = tempArr.concat(data.data.list);
 
                          var $container = $('#masonry');
                          $container.imagesLoaded(function() {

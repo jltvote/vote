@@ -141,8 +141,12 @@
 
                 <script src="/res/lib/js/lodash.min.js"></script>
                 <script src="/res/lib/js/axios.min.js"></script>
-                <script src="/res/lib/js/axios.helper.js?v=0002"></script>
-                <script src="/res/page/js/pay/pay.js?v=000012"></script>
+                <script src="/res/lib/js/jquery.min.js"></script>
+                <script src="/res/lib/js/axios.helper.js?v=0007"></script>
+                <script src="/res/lib/js/vote_helper.js?v=00007"></script>
+
+                <script src="/res/page/js/pay/pay.js?v=00007"></script>
+
 
             </body>
 
