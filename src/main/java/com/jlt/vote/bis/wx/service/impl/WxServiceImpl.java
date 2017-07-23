@@ -87,7 +87,7 @@ public class WxServiceImpl implements IWxService {
         unifiedOrderRequest.setOpenId(wxPayOrder.getOpenId());
         PaySetting paySetting = new PaySetting();
         paySetting.setAppId(sysConfig.getWxAppId());
-        paySetting.setKey(sysConfig.getWxAppSecret());
+        paySetting.setKey(sysConfig.getWxMerchantKey());
         paySetting.setMchId(sysConfig.getWxMchId());
         paySetting.setWxEndpoint(sysConfig.getWxPayUrl());
         UnifiedOrderResponse response = Payments.with(paySetting).unifiedOrder(unifiedOrderRequest);
