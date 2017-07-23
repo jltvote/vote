@@ -153,7 +153,7 @@ public class WxController {
         } catch (Exception e) {
             logger.error("VoteController.votePrepay error",e);
         }
-        ResponseUtils.createSuccessResponse(response,votePrepayRequest);
+        ResponseUtils.createSuccessResponse(response,resultMap);
     }
 
 
