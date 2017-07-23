@@ -162,11 +162,13 @@ public class WxController {
      * @param request
      * @param response
      */
-    @RequestMapping(value ="/vote/pay/callback",method = {RequestMethod.POST})
+        @RequestMapping(value ="/vote/pay/callback",method = {RequestMethod.POST})
     public void wxPayCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String xml = InputStreamUtils.InputStreamTOString(request.getInputStream(), "UTF-8");
             logger.info("~~~~~~~~~~~~~~~~~~request_para_detail_xml:" + xml);
+
+            xml = "<xml><appid><![CDATA[wx54e7794a0657d2c7]]></appid> <bank_type><![CDATA[CFT]]></bank_type> <cash_fee><![CDATA[100]]></cash_fee> <fee_type><![CDATA[CNY]]></fee_type> <is_subscribe><![CDATA[Y]]></is_subscribe> <mch_id><![CDATA[1484988012]]></mch_id> <nonce_str><![CDATA[6obx4tv22c2e1kxd0o7wizdhvayfpim9]]></nonce_str> <openid><![CDATA[oTMo21YNuO1BZqdPOIWGO1l6c5v0]]></openid> <out_trade_no><![CDATA[v2017072315008089089742307]]></out_trade_no> <result_code><![CDATA[SUCCESS]]></result_code> <return_code><![CDATA[SUCCESS]]></return_code> <sign><![CDATA[3F1AAC4766AFAAA5DC0D23549EE2FC55]]></sign> <time_end><![CDATA[20170723192201]]></time_end> <total_fee>100</total_fee> <trade_type><![CDATA[JSAPI]]></trade_type> <transaction_id><![CDATA[4001242001201707232282682620]]></transaction_id> </xml>";
             wxService.optWxPayCallback(xml);
         } catch (Exception e) {
             logger.error("wxAuthReceive occurs exception ",e);

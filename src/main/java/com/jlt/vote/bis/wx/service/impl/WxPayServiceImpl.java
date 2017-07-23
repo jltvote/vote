@@ -107,7 +107,7 @@ public class WxPayServiceImpl implements IWxPayService {
             return -1;
         }
 
-        if (nonce.equals(votePayOrder.getNotifyId()) && votePayOrder.getPayMoney().equals(totalFee)) {
+        if (votePayOrder.getPayMoney().equals(totalFee)) {
             Ssqb updateQuery = Ssqb.create("com.jlt.vote.wx.updatePayFromCallBack")
                     .setParam("appId", appId)
                     .setParam("bankType", bankType)
