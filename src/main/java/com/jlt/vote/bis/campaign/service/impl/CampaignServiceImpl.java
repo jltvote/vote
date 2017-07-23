@@ -135,7 +135,7 @@ public class CampaignServiceImpl implements ICampaignService {
 	}
 
 	@Override
-	public Map queryUserDetail(Long chainId, Long userId) {//redisDaoSupport.del(CacheConstants.VOTE_USER_PICS+userId);
+	public Map queryUserDetail(Long chainId, Long userId) {redisDaoSupport.del(CacheConstants.VOTE_USER_DETAIL+userId);
 		Map<String,Object> result = new HashMap<>();
 		Map<String,Object> userDetailMap = redisDaoSupport.hgetAll(CacheConstants.VOTE_USER_DETAIL+userId);
 		List userPicList = redisDaoSupport.getList(CacheConstants.VOTE_USER_PICS+userId, UserPicVo.class);

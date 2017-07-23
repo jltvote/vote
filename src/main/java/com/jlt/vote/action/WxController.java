@@ -146,7 +146,7 @@ public class WxController {
         onPayOrder.setOrderCode(OrderCodeCreater.createTradeNO());
         onPayOrder.setOpenId("oTMo21YNuO1BZqdPOIWGO1l6c5v0");
         onPayOrder.setTitle("支付测试");
-        onPayOrder.setPayMoney(BigDecimal.ONE);
+        onPayOrder.setPayMoney(BigDecimal.valueOf(0.01));
         HashMap<String,Object> resultMap = new HashMap<String,Object>();
         try {
             String payResult = wxService.jsOnPay(onPayOrder);
@@ -166,9 +166,7 @@ public class WxController {
     public void wxPayCallback(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             String xml = InputStreamUtils.InputStreamTOString(request.getInputStream(), "UTF-8");
-            logger.info("~~~~~~~~~~~~~~~~~~request_para_detail_xml:" + xml);
-
-            xml = "<xml><appid><![CDATA[wx54e7794a0657d2c7]]></appid> <bank_type><![CDATA[CFT]]></bank_type> <cash_fee><![CDATA[100]]></cash_fee> <fee_type><![CDATA[CNY]]></fee_type> <is_subscribe><![CDATA[Y]]></is_subscribe> <mch_id><![CDATA[1484988012]]></mch_id> <nonce_str><![CDATA[lwliuenw7lc64vbk7uufvzpcbdv5k14h]]></nonce_str> <openid><![CDATA[oTMo21YNuO1BZqdPOIWGO1l6c5v0]]></openid> <out_trade_no><![CDATA[v2017072315008100923040047]]></out_trade_no> <result_code><![CDATA[SUCCESS]]></result_code> <return_code><![CDATA[SUCCESS]]></return_code> <sign><![CDATA[2A0CFB4D3FFE3C7CF606E0A9123CCBC5]]></sign> <time_end><![CDATA[20170723194139]]></time_end> <total_fee>100</total_fee> <trade_type><![CDATA[JSAPI]]></trade_type> <transaction_id><![CDATA[4001242001201707232285193359]]></transaction_id> </xml>";
+            logger.info("~~~~~~~~~~~~~~~~~~callback_xml:" + xml);
             wxService.optWxPayCallback(xml);
         } catch (Exception e) {
             logger.error("wxAuthReceive occurs exception ",e);
